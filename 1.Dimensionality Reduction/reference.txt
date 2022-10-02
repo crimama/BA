@@ -1,0 +1,5 @@
+PCA 및 LLE 관련 
+    https://velog.io/@jhlim2993/%ED%95%B8%EC%A6%88-%EC%98%A8-%EB%A8%B8%EC%8B%A0%EB%9F%AC%EB%8B%9D-8%EC%9E%A5-%EC%B0%A8%EC%9B%90-%EC%B6%95%EC%86%8C
+MDS 튜토리얼 + PCA 비교 
+    https://towardsdatascience.com/multidimensional-scaling-mds-for-dimensionality-reduction-and-data-visualization-d5252c8bc4c0
+    
