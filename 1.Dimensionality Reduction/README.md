@@ -11,18 +11,18 @@
 - 이 때 차원축소는 고차원의 데이터를 조금 더 모델링 하기 쉽게 저차원의 데이터로 변형주는 과정입니다. 또한 고차원의 데이터는 모델의 성능을 저하시키는 노이즈를 포함할 확률이 높기 때문에 데이터의 본질적인 정보만 갖도록 저차원으로 축소시키게 됩니다.
 - 차원축소의 방법은 크게 **지도 방법**과 **비지도 방법**으로 분류가 됩니다.
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/df1bc2f2-4ced-4954-941b-8cf59724f861/Untitled.png)
+![Untitled](https://github.com/crimama/BA/blob/main/1.Dimensionality%20Reduction/source/Untitled.png)
 
 - 지도 학습 기반의 차원 축소는 차원 축소 후 모델로부터 평가받은 결과를 다시 반영하여 반복적으로 진행하여 최적의 차원을 찾는 방법입니다.
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/6e9d6356-0b78-49c0-8006-161066d3009e/Untitled.png)
+![Untitled](https://github.com/crimama/BA/blob/main/1.Dimensionality%20Reduction/source/Untitled%201.png)
 
 - 반면 비지도 차원 축소는 성능의 반영, 반복적인 과정 없이 일련의 계산을 통해 바로 최적의 차원을 찾게 됩니다. 이 일련의 계산에서는 원본 데이터의 분산, 거리와 같은 성질을 최대한 보존하는 좌표계를 찾는 과정이 해당하게 됩니다.
 - 차원축소의 방법은 **변수 선택** or **변수 추출**과 같은 테크닉에 따라서도 분류가 가능합니다.
 - 변수 선택은 원본 변수 셋에서 특정 부분 집합 변수 셋만을 선택하는 것이고
 - 반대로 변수 추출의 경우 기존의 원본 데이터의 특징을 유지하면서 더 작은 차원의 변수를 생성하는 것을 의미합니다.
 
-![Untitled](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/7cba6371-ed34-40c1-b696-df1ccdae31c6/Untitled.png)
+![Untitled](https://github.com/crimama/BA/blob/main/1.Dimensionality%20Reduction/source/Untitled%202.png)
 
 ## 2. Supervised Methods : Genetic algorithm
 
