@@ -24,13 +24,17 @@
 
 ![Untitled](https://github.com/crimama/BA/blob/main/1.Dimensionality%20Reduction/source/Untitled%202.png)
 
-## 2. Supervised Methods : Genetic algorithm
+## 2. Supervised Methods : Genetic algorithm -> [Example](https://github.com/crimama/BA/blob/main/1.Dimensionality%20Reduction/1.Genetic.ipynb)
 
 - 여기서는 지도 학습 이며 변수 선택 방법론을 다룹니다. 그 중 유전 알고리즘에 대해 자세히 다룰 예정입니다.
 - 우선 유전 알고리즘에 대해 다루기 전에 전진 선택법, 후방 선택법, 단계적 선택법에 대해 간단하게 다룬 뒤 유전 알고리즘에 대해 다루겠습니다.
 
 ## 3. Unsupervised Method
 
-- PCA
-- MDS
-- ISOMAP,LLE,t-SNE
+### 3.1. Linear embedding
+  - PCA
+  - MDS [Example](https://github.com/crimama/BA/blob/main/1.Dimensionality%20Reduction/2.MDS.ipynb)
+### 3.2. Nonlinear embedding [Example](https://github.com/crimama/BA/blob/main/1.Dimensionality%20Reduction/3.non_linear.ipynb)
+  - ISOMAP 
+  - LLE 
+  - t-SNE 
