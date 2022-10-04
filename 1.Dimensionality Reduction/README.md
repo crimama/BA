@@ -12,7 +12,7 @@
 - 이 때 차원축소는 고차원의 데이터를 조금 더 모델링 하기 쉽게 저차원의 데이터로 변형주는 과정입니다. 또한 고차원의 데이터는 모델의 성능을 저하시키는 노이즈를 포함할 확률이 높기 때문에 데이터의 본질적인 정보만 갖도록 저차원으로 축소시키게 됩니다.
 - 차원축소의 방법은 크게 **지도 방법**과 **비지도 방법**으로 분류가 됩니다.
 
-![Untitled](https://github.com/crimama/BA/blob/main/1.Dimensionality%20Reduction/source/Untitled.png)
+![Untitled](https://github.com/crimama/BA/blob/main/1.Dimensionality%20Reduction/source/Untitled.png){: width="10" height="10"}
 
 - 지도 학습 기반의 차원 축소는 차원 축소 후 모델로부터 평가받은 결과를 다시 반영하여 반복적으로 진행하여 최적의 차원을 찾는 방법입니다.
 
