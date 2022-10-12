@@ -54,3 +54,9 @@ $$
 $$
 minL_p(w,b,\alpha_i) = {1\over 2}||w||^2 - {\sum}^N_{i=1} \alpha_i(y_i(w^Tx_i +b)-1)
 $$
+     
+- 여기서 KKTcondition에 따라 아래와 같은 수식이 성립한다. 
+- kkt Condition 
+ $$
+ {\alpha L_p \over {\alpha w}} = 0 => w = \sum^N_{i=1}\alpha_i y_i x_i
+ $$ 
