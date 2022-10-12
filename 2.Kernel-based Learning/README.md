@@ -23,6 +23,34 @@
    - 즉 마진 최대화 -> Vc dimension 감소 -> 구조적 위험도 감소로 수렴하게 된다. 
      
 ## 2. SVM 도출 과정 
-
+### 2.1 Hard margin SVM, linear case
+     
 Emperical risk는 d차원의 데이터를 나누는 d-1차원의 hyperplane을 구하는 문제로, 아래의 식에서 w와 b를 구하는 것이 목적이다. 
-     $H = {x -> sign(w \cdot x + b : w \in R^d, b \in R)}$
+
+$$
+H = \{x -> sign(w \cdot x + b : w \in R^d, b \in R)\}
+$$
+
+- 이 수식을 통해 도출되는 w와 b의 조합이 classification boundary이며 이를 통해 나오는 결과 값이 + 또는 -의 부호를 갖게 되며 이 부호가 각 데이터 포인트들이 속하는 클래스를 의미하게 된다.      
+- Classification Boundary는 하나가 아니며 여러 boundary 가운데 VC dimension을 최소화 하는 boundary를 선택하게 된다. 
+- 마진과 VC Dimension 간에는 아래와 같은 관계가 성립한다. 
+
+$$
+h \leq min([{R^2 \over \delta^2}], D) +1      
+$$
+     
+- 위 식에서 R은 hyperplane의 반지름으로 모든 데이터를 감싸는 원을 그렸을 때 반지름을 의미한다. 
+- 이 식에 따르면 마진($\delta$)이 커지는 것은 곧 VC dimension(h)가 작아지는 것을 의미한다. 
+- 이를 다시 목적 함수로 정의를 하면 
+     
+$$
+Objective function: min {1 \over 2}||w||^2
+$$ 
+
+- 이에 대하여 제약식이 존재하는데 $s.t.y_i(w^Tx_i +b) \geq 1$ 이며 이는 어떤 feature set x의 벡터가 주어졌을 때 이를 + 또는 -로 분류하는 hyperplane을 의미하며 위의 목적함수는 제약식을 만족하는 hyperplane 중 마진을 최대화 하는 최적값을 찾는 것을 의미한다. 
+
+- 제약이 있는 최적화 문제를 풀기 위해 라그랑지앙 승수법을 사용한다. 
+     
+$$
+minL_p(w,b,\alpha_i) = {1\over 2}||w||^2 - {\sum}^N_{i=1} \alpha_i(y_i(w^Tx_i +b)-1)
+$$
