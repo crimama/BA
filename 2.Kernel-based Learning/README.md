@@ -23,6 +23,9 @@
    - 즉 마진 최대화 -> Vc dimension 감소 -> 구조적 위험도 감소로 수렴하게 된다. 
      
 ## 2. SVM Cases 
+     
+<p align="center"><img src = "https://user-images.githubusercontent.com/92499881/195294814-c6d5a20b-e26d-4054-85a4-a5a22597d66b.png" width="50%" height='50%'/>
+  
 ### 2.1 Case 1 : Linear & Hard margin SVM
      
 **목적함수정의**   
@@ -91,3 +94,6 @@ $$
 - 여기서 C는 페널티에 대한 hyperparameter로 페널티를 얼마나 과중하게 보는 지를 결정한다.
 - 목적함수는 마진의 최대화와 함께 페널티의 최소화를 달성하는 것이 목적이다.
 - 목적 함수는 Case 1과 비슷하게 w,b 그리고 $\xi$의 라그랑주 문제이며 각 항에 대해 편미분 후 라그랑주 승수 와 x,y에 대한 식으로 정리하여 푸는 과정은 Case 1과 동일하다.
+
+### 2.3 Case 3 : Linear & soft Margin SVM 
+     
