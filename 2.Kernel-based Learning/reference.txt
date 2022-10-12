@@ -1,0 +1,2 @@
+#svm 
+https://github.com/fbeilstein/simplest_smo_ever/blob/master/simple_svm.ipynb
