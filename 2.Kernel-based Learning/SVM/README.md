@@ -1,7 +1,7 @@
 # SVM
 
 - 이론적 배경 및 Case 1,2,3에 대한 설명입니다. 
-- 실제 Code Example은 이 중 Case 3번에 대해 다룹니다. 
+- Code Example은 이 중 Case 3번에 대해 다룹니다. 
 - [Code Example](https://github.com/crimama/BA/tree/main/2.Kernel-based%20Learning/SVM)
 
 
