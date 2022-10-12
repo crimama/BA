@@ -25,7 +25,8 @@
 ## 2. SVM 도출 과정 
 ### 2.1 Hard margin SVM, linear case
      
-Emperical risk는 d차원의 데이터를 나누는 d-1차원의 hyperplane을 구하는 문제로, 아래의 식에서 w와 b를 구하는 것이 목적이다. 
+**목적함수정의**   
+- Emperical risk는 d차원의 데이터를 나누는 d-1차원의 hyperplane을 구하는 문제로, 아래의 식에서 w와 b를 구하는 것이 목적이다. 
 
 $$
 H = \{x -> sign(w \cdot x + b : w \in R^d, b \in R)\}
@@ -46,7 +47,9 @@ $$
 $$
 Objective function: min {1 \over 2}||w||^2
 $$ 
-
+     
+**제약조건, 최적화** 
+     
 - 이에 대하여 제약식이 존재하는데 $s.t.y_i(w^Tx_i +b) \geq 1$ 이며 이는 어떤 feature set x의 벡터가 주어졌을 때 이를 + 또는 -로 분류하는 hyperplane을 의미하며 위의 목적함수는 제약식을 만족하는 hyperplane 중 마진을 최대화 하는 최적값을 찾는 것을 의미한다. 
 
 - 제약이 있는 최적화 문제를 풀기 위해 라그랑지앙 승수법을 사용한다. 
@@ -55,8 +58,21 @@ $$
 minL_p(w,b,\alpha_i) = {1\over 2}||w||^2 - {\sum}^N_{i=1} \alpha_i(y_i(w^Tx_i +b)-1)
 $$
      
+- L을 미지수 w와 b로 각각 편미분한 값이 0이 되는 곳에서 최소값을 가지므로 이를 정리하면 w와 b를 a,x,y에 대한 식으로 정리할 수 있다. 
+- 이를 목적 함수에 넣어 정리하면 a,x,y에 대한 식으로 정리가 가능하며 이 때 x와y는 이미 주어진 값이므로 SVM 문제를 미지수 $\alpha$의 이차 방정식을 푸는 문제로 정의할 수 있다. 
+     
+$$
+max L_D(\alpha_i) = \sum^N_{i=1}\alpha_i - {1\over 2}\sum^N_{i=1}\sum^N_{j=1}\alpha_i\alpha_jy_iy_jx_i^Tx_js.t. \sum^N_{i=1}\alpha_iy_i = 0, \alpha_i \geq 0
+$$
+     
 - 여기서 KKTcondition에 따라 아래와 같은 수식이 성립한다. 
-- kkt Condition 
- $$
- {\alpha L_p \over {\alpha w}} = 0 => w = \sum^N_{i=1}\alpha_i y_i x_i
- $$ 
+     
+$$
+kkt\space condition : {\alpha L_p \over {\alpha w}} = 0 => w = \sum^N_{i=1}\alpha_i y_i x_i
+$$ 
+
+$$
+\alpha_i(y_i(w^Tx_i+b)-1) =0
+$$ 
+- 즉 $\alpha$가 0 -> y(wx+b)-1 != 0 
+- 또는 y(wx+b)-1 = 0 -> $\alpha$ != 0 
