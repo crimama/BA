@@ -1,6 +1,8 @@
 # SVM
 
-- Support Vectors Machine(SVM)에 관한 자세한 이론은 [theory](theory.md) 에서 다루며 해당 페이지에서는 SVM에 대한 Overview + tutorial에 대해 다룹니다 
+- Support Vectors Machine(SVM)에 관한 이론적 배경과 함께 비선형 데이터를 위한 Case 3 : Kernel SVM에 대해 주로 다룹니다. 
+- 관련된 이론적 배경을 설명한 뒤 실질적으로 비선형 데이터를 분류하는지 시각화를 통해 확인하고자 합니다. 
+- 그 외에도 다른 비선형 분류 방법론들과 함께 비교하면서 어떤 차이점이 있는지 비교하고자 합니다. 
 
 # Table of Contents 
   - [1.이론적 배경](#1이론적-배경)
@@ -10,7 +12,10 @@
   - [3.kernel svm](#case-3--linear--soft-margin-svm)
 
   - [Appendix : 이론적 배경](theory.md)
+    - [Kernel SVM을 이용한 비선형 데이터 분류](#kernel-svm을-이용한-비선형-데이터-분류)
+    - [다른 분류 모델과 비교](#다른-분류-모델과의-비교)
  
+$\space$ 
 # 1.이론적 배경
 
 **Support Vector Machine**은 벡터 공간에서 다른 클래스의 데이터들간 가장 잘 나눌 수 있는 초 평면, 결정 경계를 찾는 것을 목적으로 한다. 분류되지 않은 새로운 데이터가 나타났을 때 이 경계를 기준으로 어느 위치에 있는지 확인하여 분류 과제를 수행할 수 있다. 즉 SVM은 이 결정 경계를 어떻게 정의하고 계산하는 것이 매우 중요하다. 가운데 실선이 결정 경계이며, 실선으로 부터 가장 가까운 검은색 테두리의 빨간색 점 그리고 파란색 점을 지나는 점선이 존재한다. 결정경계부터 점선까지의 거리를 마진(margin)이라고 한다. SVM은 결정 경계를 만들 때 Margin을 최대화 하는 결정 경계를 찾고자 한다. 이러한 이유는 모델의 구조적 위험 때문이다.  
@@ -82,4 +87,73 @@ $$
 - Sigmoid 
 - 커널함수에 따라 나타나는 결정 경계면의 형태가 다르며 커널 함수 별 특징이 있다. 가우시안 커널 함수(RBF)의 경우 이론적으로 무한개의 점을 shatter 할 수 있다 라는 장점이 있다. (VC dimension이 무한대가 아님) 
 
-## SVM 실험 
+# Kernel SVM을 이용한 비선형 데이터 분류 
+- 이번 파트 부터는 실질적 코드와 시각화를 통해 kernel SVM이 어떻게 작용하고, kernel 함수에 따라 결정 경계면과 Metrics이 어떻게 변하는지 확인하고자 한다. 
+- kernel만의 비교 뿐만 아니라 다른 분류 모델과의 비교 또한 진행하고자 한다. 
+
+## Kernel 함수에 따른 차이 비교 
+
+### 1. 데이터 로드 및 확인 
+- 실험에 사용할 데이터는 Sklearn 라이브러리에 포함되어 있는 iris데이터를 사용한다 
+- Feature로는 `sepal length` 와 `sepal width`만을 사용 함
+```python
+def data_load():
+    #데이터 로드 
+    data = load_iris() 
+    df = pd.DataFrame(data.data)
+    df.columns = data['feature_names']
+    df['class'] = data['target']
+    df = df.sample(frac=1,random_state=42).reset_index(drop=True) #shuffle 
+    return df 
+
+def train_split(X,Y):
+    idx = int(len(X)*0.8)
+    train_x = X[:idx]
+    train_y = Y[:idx]
+    test_x = X[idx:]
+    test_y = Y[idx:]
+    return train_x, train_y, test_x, test_y
+
+
+def data_preprocess(df):
+    class_list = ['sepal length (cm)','sepal width (cm)']
+    X = df.drop(columns='class')[class_list].to_numpy()
+    Y = df['class'].to_numpy()
+
+
+    train_x, train_y, test_x, test_y = train_split(X,Y)
+    return (X,Y),(train_x, train_y, test_x, test_y)
+
+df = data_load() 
+
+(X,Y),(train_x, train_y, test_x, test_y) = data_preprocess(df)
+
+
+for i in np.unique(df['class']):
+    plt_x = X[np.where(Y == i )[0]] 
+    plt.scatter(plt_x[:,0],plt_x[:,1],label=i)
+    plt.legend()
+plt.show()
+```
+<p align="center"><img src = https://user-images.githubusercontent.com/92499881/198553665-d2719c66-67d8-4fe6-a8c7-19d13bc4a30a.png width="35%" height='30%'/>
+
+- 클래스 0과 나머지 사이에는 명확하게 분류가 가능하지만 1과 2는 다소 겹쳐있음을 확인할 수 있다. 
+
+### 2. 모델링 및 커널에 따른 차이 비교 
+- 제일 먼저 커널함수를 `linear`로 사용하여 모델을 만들었으며, 해당 모델의 성능과 Decision boundary plot은 아래와 같다. 
+  
+|  | Accuracy | Precision | Recall | F1-score |
+| --- | --- | --- | --- | --- |
+| Linear | 0.767  | 0.797  | 0.795  | 0.796  |
+| RBF | 0.767  | 0.797  | 0.795  | 0.796  |
+| Sigmoid | 0.233  | 0.078  | 0.333  | 0.126  |
+| Polynomial | 0.767  | 0.797  | 0.795  | 0.796  |
+<figure>
+  <p align = 'center'><img src = "https://user-images.githubusercontent.com/92499881/198580139-35351888-10fd-4185-a04d-f550f598e7ea.png" width="70%" height='50%'/>
+</figure>
+ 
+
+
+## 다른 분류 모델과의 비교 
+
+
