@@ -149,9 +149,10 @@ plt.show()
 | Sigmoid | 0.233  | 0.078  | 0.333  | 0.126  |
 | Polynomial | 0.767  | 0.797  | 0.795  | 0.796  |
 <figure>
-  <p align = 'center'><img src = "https://user-images.githubusercontent.com/92499881/198580139-35351888-10fd-4185-a04d-f550f598e7ea.png" width="70%" height='50%'/>
+  <p align = 'center'><img src = "https://user-images.githubusercontent.com/92499881/198582135-99adcedb-2782-42b2-b39f-f7102db7e4d3.png" width="70%" height='50%'/>
 </figure>
  
+
 
 
 ## 다른 분류 모델과의 비교 
