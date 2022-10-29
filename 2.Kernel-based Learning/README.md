@@ -11,7 +11,8 @@
     - [2.1 Case 3 : kernel SVM](#21-case-3--linear--soft-margin-svm)
   - [3. Kernel SVM을 이용한 비선형 데이터 분류](#3-kernel-svm을-이용한-비선형-데이터-분류)
     - [3.1 kernel 함수에 따른 차이 비교 ](#31-kernel-함수에-따른-차이-비교)
-    - [3.2 다른 분류 모델과의 비교](#32-다른-분류-모델과의-비교)
+    - [3.2 C에 따른 차이 비교](#32-하이퍼파라미터-c에-따른-비교) 
+    - [3.3 다른 분류 모델과의 비교](#33-다른-분류-모델과의-비교)
   - [Appendix : 이론적 배경](theory.md)
     
  
@@ -225,8 +226,12 @@ for kernel,ax in zip(['linear','rbf','sigmoid','poly'],[ax1,ax2,ax3,ax4]):
 - 이상하게도 sigmoid는 아예 분류를 하지 못했으며, Metric에서도 ACC : 0.233으로 매우 낮았다. 이는 Radnom 추출 보다도 못하다라 해도 무방한데, 이는 Sigmoid 함수가 Binary classification에 적합하여 Multi class인 이 케이스와는 적합하지 않기 때문이라 생각된다. 
 
 $\space$
+## 3.2 하이퍼파라미터 C에 따른 비교 
 
-## 3.2 다른 분류 모델과의 비교 
+### 3.2.1 모델링 및 결과 비교 
+### 3.2.2 그래프 분석 
+
+## 3.3 다른 분류 모델과의 비교 
 - 앞선 과정에선 SVM 방식을 사용하되 Kernel Function의 종류에 따라 Decision boundary가 어떻게 바뀌나 확인했다. 
 - 이번 파트에서는 RBF 커널을 사용하는 SVM과 다른 알고리즘을 사용한 모델들을 비교하고자 한다. 
 - 비교하고자 하는 모델은 다음과 같다. 
@@ -237,7 +242,7 @@ $\space$
   - Gradient Boost 
   - Neural Network 
 - 데이터는 앞선 과정과 동일하게 `iris` 데이터 사용 
-### 3.2.1 모델링 및 결과 비교 
+### 3.3.1 모델링 및 결과 비교 
 **Neural Network 학습 용 코드**
 ```python
 import torch 
@@ -340,3 +345,7 @@ nn_plot_decision_boundary(test_x,test_y,NN,ax6,'nn')
         
 ```
 <p align='center'><img src=https://user-images.githubusercontent.com/92499881/198611451-b9e4f2e8-6ac9-4ae2-bbf8-e662631cdb12.png width='80%',h`eight='50%'>`
+
+### 3.3.2 그래프 분석 
+- 로지스틱 회귀와 SGD classifier의 경우 선형모델이므로 Decision boundary모두 선형으로 형성되어 있는 것을 확인할 수 있다. 반대로 Random forest와 Adaptive boost, Gradient boost 의 경우 선형 모델으 앙상블 모델 이기 때문에 Decision boundary가 완전한 선형도 비선형도 아닌 선형의 계단형태로 나타난다 
+- Neural Network의 경우 10개의 노드를 가진 3개의 레이어로 구성되어 있는 모델을 사용했으며 비선형 함수 ReLU를 사용했기 때문에 비선형의 Decision boundary로 구성되어 있다고 생각될 수 있으며, 모델 특성 탓 Train 데이터에 overfitting 되어 있다고 생각 된다. 

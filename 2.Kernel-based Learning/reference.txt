@@ -1,2 +1,6 @@
-#svm 
-https://github.com/fbeilstein/simplest_smo_ever/blob/master/simple_svm.ipynb
+- 마지막 수정 사항 -> to do 
+    - 그래프 Train, Test 추가 
+    - Train, Test 나눠서 수행했다는 부문 명시 
+    - 코드 수정 사항 변경 
+    - 그래프 분석 추가 
+    - C에 따른 차이 비교 추가 
