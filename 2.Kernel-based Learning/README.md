@@ -10,8 +10,8 @@
   - [2.SVM Cases](#2-svm-cases)
   
   - [3.kernel svm](#case-3--linear--soft-margin-svm)
-    - [3.1 Kernel 함수에 따른 차이 비교](#3.1 Kernel 함수에 따른 차이 비교)
-    - [3.2 다른 분류 모델과의 비교](#3.2 다른 분류 모델과의 비교)
+    - [3.1 Kernel 함수에 따른 차이 비교](#3.1-Kernel-함수에-따른-차이-비교)
+    - [3.2 다른 분류 모델과의 비교](#3.2-다른-분류-모델과의-비교) 
 
   - [Appendix : 이론적 배경](theory.md)
     
