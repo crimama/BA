@@ -10,10 +10,11 @@
   - [2.SVM Cases](#2-svm-cases)
   
   - [3.kernel svm](#case-3--linear--soft-margin-svm)
-
-  - [Appendix : 이론적 배경](theory.md)
     - [Kernel SVM을 이용한 비선형 데이터 분류](#kernel-svm을-이용한-비선형-데이터-분류)
     - [다른 분류 모델과 비교](#다른-분류-모델과의-비교)
+
+  - [Appendix : 이론적 배경](theory.md)
+    
  
 $\space$ 
 # 1.이론적 배경
