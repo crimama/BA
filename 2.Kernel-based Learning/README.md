@@ -8,11 +8,10 @@
   - [1.이론적 배경](#1이론적-배경)
 
   - [2.SVM Cases](#2-svm-cases)
-  
-  - [3.kernel svm](#case-3--linear--soft-margin-svm)
-    - [3.1 Kernel 함수에 따른 차이 비교](#3.1-Kernel-함수에-따른-차이-비교)
-    - [3.2 다른 분류 모델과의 비교](#3.2-다른-분류-모델과의-비교) 
-
+    - [2.1 Case 3 : kernel SVM](#21-case-3--linear--soft-margin-svm)
+  - [3. Kernel SVM을 이용한 비선형 데이터 분류](#3-kernel-svm을-이용한-비선형-데이터-분류)
+    - [3.1 kernel 함수에 따른 차이 비교 ](#31-kernel-함수에-따른-차이-비교)
+    - [3.2 다른 분류 모델과의 비교](#32-다른-분류-모델과의-비교)
   - [Appendix : 이론적 배경](theory.md)
     
  
@@ -49,7 +48,7 @@ $\space$
 - Case 3에 대한 설명과 함께 코드와 데이터를 통해 실질적으로 Kernel SVM이 비선형 데이터를 분류할 수 있는지 확인하고 다른 비선형 방법들과 비교를 해보고자 한다. 
 </figure>
 
-##  Case 3 : Linear & soft Margin SVM
+## 2.1 Case 3 : Linear & soft Margin SVM
   
 - 만약 고차원의 데이터 이거나 클래스 간 결정 경계면이 **비선형**인 경우 앞선 Case 1과 Case 2를 사용하는데 어려움을 겪을 수 있다. 
 - 그래서 Case 3는 원래 공간이 아닌 선형 분류가 가능한 더 고차원의 공간으로 보내 모델을 학습하자 라는 아이디어를 갖고 출발하며, 고차원 공간으로 옮기기 위해 매핑 함수를 사용한다. 
