@@ -14,6 +14,7 @@
     - [3.2 C에 따른 차이 비교](#32-하이퍼파라미터-c에-따른-비교) 
     - [3.3 다른 분류 모델과의 비교](#33-다른-분류-모델과의-비교)
   - [Appendix : 이론적 배경](theory.md)
+  - [Appendix : Baseline Code](https://github.com/crimama/BA/blob/main/2.Kernel-based%20Learning/SVM/SVM.ipynb)
     
  
 $\space$ 
