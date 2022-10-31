@@ -432,5 +432,5 @@ test_metric_list.append(NN_metric(NN,test_x,test_y))
 </figure>  
 
 ### 3.3.2 그래프 분석 
-- 로지스틱 회귀와 SGD classifier의 경우 선형모델이므로 Decision boundary모두 선형으로 형성되어 있는 것을 확인할 수 있다. 반대로 Random forest와 Adaptive boost, Gradient boost 의 경우 선형 모델으 앙상블 모델 이기 때문에 Decision boundary가 완전한 선형도 비선형도 아닌 선형의 계단형태로 나타난다 
+- 로지스틱 회귀와 SGD classifier의 경우 선형모델이므로 Decision boundary모두 선형으로 형성되어 있는 것을 확인할 수 있다. 반대로 Random forest와 Adaptive boost, Gradient boost 의 경우 선형 모델의 앙상블 모델 이기 때문에 Decision boundary가 완전한 선형도 비선형도 아닌 선형의 계단형태로 나타난다 
 - Neural Network의 경우 10개의 노드를 가진 3개의 레이어로 구성되어 있는 모델을 사용했으며 비선형 함수 ReLU를 사용했기 때문에 비선형의 Decision boundary로 구성되어 있다고 생각될 수 있으며, 모델 특성 탓 Train 데이터에 overfitting 되어 있다고 생각 된다. 
