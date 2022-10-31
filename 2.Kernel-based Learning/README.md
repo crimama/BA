@@ -276,7 +276,8 @@ for C,ax in zip([1,10,100,10000],[ax1,ax2,ax3,ax4]):
 </figure>
 
 ### 3.2.2 그래프 분석 
-- C 값에 따라 Decision boundary 가 다르게 나타남, 대체적으로 C가 커질 수록 Decision boundary의 곡률이 커짐 
+- C 값에 따라 Decision boundary 가 다르게 나타남, 대체적으로 C가 커질 수록 Decision boundary의 곡률이 커짐, 이는 C 값이 커질 수록 Error에 대한 패널티를 주게 되고 Decision boundary는 최대한 에러를 피하면서 형성되려고 한다. 따라서 다른 클래스를 최대한 피하면서 Decision boundary가 형성되다 보니 더더욱 곡선 형태를 띄게 된다. 
+- 하지만 C 값에 상관 없이 빨간색은 대체로 명확한 Decision boundary를 가지며 나뉘어 지지만, Blue-Green 사이의 Decision boundary는 두 개의 클래스의 거리가 가까운 탓에 C 값에 따라 변화가 큰 것으로 생각 된다. 
 
 
 $\space$ 
