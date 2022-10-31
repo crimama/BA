@@ -1,5 +1,6 @@
 # SVM
 
+
 - Support Vectors Machine(SVM)에 관한 이론적 배경과 함께 비선형 데이터를 위한 Case 3 : Kernel SVM에 대해 주로 다룹니다. 
 - 관련된 이론적 배경을 설명한 뒤 실질적으로 비선형 데이터를 어떻게 분류하는지 시각화를 통해 확인하고자 합니다. 
 - 그 외에도 Penalty : C에 따라 어떻게 Decision boundary가 변하는지, 다른 분류 방법론과는 어떤 차이가 있는지 비교하고자 합니다. 
@@ -270,7 +271,7 @@ for C,ax in zip([1,10,100,10000],[ax1,ax2,ax3,ax4]):
     plot_decion_boundary(xx1,xx2,Z,ax,train_x,train_y,C)  
     
 ```
-<p align='center'><img src='https://user-images.githubusercontent.com/92499881/198935745-88e1b1f7-ce9f-47b7-a0a6-03fd3434a471.png' width='40%',weight='50%'>
+<p align='center'><img src='https://user-images.githubusercontent.com/92499881/198944731-b2b32465-a22d-4853-b0bd-0a658b2e8314.png' width='40%',weight='50%'>
 <figure class='half'>
     <p align='center'><img src = "https://user-images.githubusercontent.com/92499881/198934442-14fd4f74-1095-48d8-b460-7c77f9ef4714.png" width="35%" height='30%'>
     <img src = "https://user-images.githubusercontent.com/92499881/198935106-555ae924-ab28-4dee-b0cb-e3826393ab71.png" width="35%" height='30%'/>
