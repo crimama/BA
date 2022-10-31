@@ -94,6 +94,11 @@ $\space$
 # 3. Kernel SVM을 이용한 비선형 데이터 분류 
 - 이번 파트 부터는 실질적 코드와 시각화를 통해 kernel SVM이 어떻게 작용하고, kernel 함수에 따라 결정 경계면과 Metrics이 어떻게 변하는지 확인하고자 한다. 
 - kernel만의 비교 뿐만 아니라 다른 분류 모델과의 비교 또한 진행하고자 한다. 
+- 모델 학습과 Decision boundary는 Train 데이터를 이용했으며, 각 Plot과 Metrics에 대해서는 Train, Test 각각 시행 함  
+- 비교 실험은 다음과 같이 진행 됨 
+  - 커널 함수에 다른 Decision boundary, Metrics 비교 
+  - Margin C에 따른 Decision boundary, Metrics 비교 
+  - 다른 알고리즘을 사용한 경우 
   
 $\space$
 ## 3.1 Kernel 함수에 따른 차이 비교 
@@ -150,7 +155,6 @@ $\space$
 ### 3.1.2. 모델링 및 커널함수에 따른 차이 비교 
 ```python
 def make_decision_boundary(X,y,classifier,kernel,resolution=0.02):
-    #Decion boundary 생성 
     x1_min, x1_max = X[:, 0].min() - 1, X[:, 0].max() + 1
     x2_min, x2_max = X[:, 1].min() - 1, X[:, 1].max() + 1
     xx1, xx2 = np.meshgrid(np.arange(x1_min, x1_max, resolution),
@@ -159,8 +163,7 @@ def make_decision_boundary(X,y,classifier,kernel,resolution=0.02):
     Z = Z.reshape(xx1.shape)
     return xx1,xx2,Z
 
-def plot_decion_boundary(xx1,xx2,z,ax,X,y):
-    #앞서 생성한 Decision boundary plot 
+def plot_decion_boundary(xx1,xx2,z,ax,X,y,kernel):
     markers = ('s', 'x', 'o', '^', 'v')
     colors = ('red', 'blue', 'lightgreen', 'gray', 'cyan')
     cmap = ListedColormap(colors[:len(np.unique(y))])
@@ -168,8 +171,8 @@ def plot_decion_boundary(xx1,xx2,z,ax,X,y):
     ax.contourf(xx1, xx2, Z, alpha=0.3, cmap=cmap)
     ax.set_xlim(xx1.min(), xx1.max())
     ax.set_ylim(xx2.min(), xx2.max())
-    ax.set_title(f'{kernel}',fontsize=32)
-    # 샘플의 산점도 
+    ax.set_title(f'{kernel}',fontsize=20)
+    # 샘플의 산점도를 그립니다
     for idx, cl in enumerate(np.unique(y)):
         ax.scatter(x=X[y == cl, 0],
                    y=X[y == cl, 1],
@@ -198,27 +201,39 @@ def model_train(kernel,data):
 
 (X,Y),data = data_preprocess(df)
 
-fig, ((ax1, ax2),(ax3,ax4)) = plt.subplots(ncols=2,nrows=2,figsize=(10, 10))
 
-metric_list = [] 
+fig, ((ax1, ax2),(ax3,ax4)) = plt.subplots(ncols=2,nrows=2,figsize=(10, 10))
+fig.suptitle('Train data Cases',fontsize=25)
+
+train_metric_list = [] 
 for kernel,ax in zip(['linear','rbf','sigmoid','poly'],[ax1,ax2,ax3,ax4]):
     model = model_train(kernel,data)
-    metric = model_metric(model,test_x,test_y)
-    xx1,xx2,Z = make_decision_boundary(test_x,test_y,model,kernel)
-    plot_decion_boundary(xx1,xx2,Z,ax,test_x,test_y)
+    train_metric_list.append(model_metric(model,train_x,train_y))
+    xx1,xx2,Z = make_decision_boundary(train_x,train_y,model,kernel)
+    plot_decion_boundary(xx1,xx2,Z,ax,train_x,train_y,kernel)  
+    
+fig, ((ax1, ax2),(ax3,ax4)) = plt.subplots(ncols=2,nrows=2,figsize=(10, 10))
+fig.suptitle('Test data Cases',fontsize=25)
+
+test_metric_list = [] 
+for kernel,ax in zip(['linear','rbf','sigmoid','poly'],[ax1,ax2,ax3,ax4]):
+    model = model_train(kernel,data)
+    test_metric_list.append(model_metric(model,test_x,test_y))
+    xx1,xx2,Z = make_decision_boundary(train_x,train_y,model,kernel)
+    plot_decion_boundary(xx1,xx2,Z,ax,test_x,test_y,kernel)
+    
     
     
     
 ```
 - 제일 먼저 커널함수를 `linear`로 사용하여 모델을 만들었으며, 해당 모델의 성능과 Decision boundary plot은 아래와 같다. 
   
-<p align = 'center'><img src = 'https://user-images.githubusercontent.com/92499881/198582855-02e34f99-de91-43c5-9f0e-ddeeb1223149.png'>
+<p align = 'center'><img src = 'https://user-images.githubusercontent.com/92499881/198932788-a945df2c-f5df-400e-8d54-08549da49765.png'>
 
-<figure>
-  <p align = 'center'><img src = "https://user-images.githubusercontent.com/92499881/198582135-99adcedb-2782-42b2-b39f-f7102db7e4d3.png" width="70%" height='50%'/>
+<figure class='half'>
+    <p align='center'><img src = "https://user-images.githubusercontent.com/92499881/198932242-a5a5e2c2-df8d-4a5f-95a5-2d3ae40fbfd7.png" width="35%" height='30%'>
+    <img src = "https://user-images.githubusercontent.com/92499881/198932284-58e5c233-2ec7-427d-9597-3f8eab252187.png" width="35%" height='30%'/>
 </figure>
- 
- $\space$
 
 ### 3.1.3. 그래프 분석 
 - Linear 커널을 사용한 경우 세 class 사이의 Decision boundary가 모두 선형으로 나타나 있는 것을 알 수 있다. 하지만 데이터들의 차원이 그리 크지 않고 복잡하지 않기 때문에 다른 커널과 비교했을 때 Metric에서 크게 밀리지 않는다. 
@@ -227,9 +242,44 @@ for kernel,ax in zip(['linear','rbf','sigmoid','poly'],[ax1,ax2,ax3,ax4]):
 
 $\space$
 ## 3.2 하이퍼파라미터 C에 따른 비교 
+- Margin 값을 어떻게 해주냐에 따라 Decision boundary가 어떻게 그려지는지 확인 해봄 
 
 ### 3.2.1 모델링 및 결과 비교 
+```python
+def C_model_train(data,C):
+    (train_x, train_y, test_x, test_y) = data 
+
+    model = SVC(C=C,kernel='poly')
+    model.fit(train_x,train_y)
+    y_pred = model.predict(test_x)
+    return model 
+
+
+(X,Y),data = data_preprocess(df)
+
+
+fig, ((ax1, ax2),(ax3,ax4)) = plt.subplots(ncols=2,nrows=2,figsize=(10, 10))
+fig.suptitle('Train data Cases',fontsize=25)
+
+train_metric_list = [] 
+for C,ax in zip([1,10,100,10000],[ax1,ax2,ax3,ax4]):
+    model = C_model_train(data,C)
+    train_metric_list.append(model_metric(model,train_x,train_y))
+    xx1,xx2,Z = make_decision_boundary(train_x,train_y,model,kernel)
+    plot_decion_boundary(xx1,xx2,Z,ax,train_x,train_y,C)  
+    
+```
+<p align='center'><img src='https://user-images.githubusercontent.com/92499881/198935745-88e1b1f7-ce9f-47b7-a0a6-03fd3434a471.png' width='40%',weight='50%'>
+<figure class='half'>
+    <p align='center'><img src = "https://user-images.githubusercontent.com/92499881/198934442-14fd4f74-1095-48d8-b460-7c77f9ef4714.png" width="35%" height='30%'>
+    <img src = "https://user-images.githubusercontent.com/92499881/198935106-555ae924-ab28-4dee-b0cb-e3826393ab71.png" width="35%" height='30%'/>
+</figure>
+
 ### 3.2.2 그래프 분석 
+- C 값에 따라 Decision boundary 가 다르게 나타남, 대체적으로 C가 커질 수록 Decision boundary의 곡률이 커짐 
+
+
+$\space$ 
 
 ## 3.3 다른 분류 모델과의 비교 
 - 앞선 과정에선 SVM 방식을 사용하되 Kernel Function의 종류에 따라 Decision boundary가 어떻게 바뀌나 확인했다. 
@@ -267,7 +317,19 @@ class Model(nn.Module):
         x = self.fc1_1(x)
         x = self.fc2(x)
         return x 
+    
+def NN_metric(NN,data_x,data_y):
+    data_x,data_y= torch.tensor(data_x).to(device).type(torch.float), torch.tensor(data_y).to(device).type(torch.float)
+    y_pred = NN(data_x)
+    y_pred = torch.argmax(y_pred,axis=1).detach().cpu().numpy()
 
+    f1 = f1_score(data_y.detach().cpu().numpy(),y_pred,average='macro')
+    acc = accuracy_score(data_y.detach().cpu().numpy(),y_pred)
+    recall = recall_score(data_y.detach().cpu().numpy(),y_pred,average='macro')
+    precision = precision_score(data_y.detach().cpu().numpy(),y_pred,average='macro')
+    return [acc,precision,recall,f1]
+    
+    
 def nn_plot_decision_boundary(X,y,classifier,kernel,ax,resolution=0.2):
     markers = ('s', 'x', 'o', '^', 'v')
     colors = ('red', 'blue', 'lightgreen', 'gray', 'cyan')
@@ -300,8 +362,6 @@ def nn_plot_decision_boundary(X,y,classifier,kernel,ax,resolution=0.2):
 fig,ax = plt.subplots(2,1)
 
 
-
-
 device = 'cuda:0'
 NN = Model().to(device)
 optimizer = torch.optim.Adam(NN.parameters(),lr=1e-3)
@@ -320,7 +380,7 @@ for epoch in range(num_epochs):
     
     print(loss)
     
-y_pred = torch.argmax(NN(torch.tensor(test_x).to(device).type(torch.float)),axis=1).detach().cpu().numpy()    
+y_pred = torch.argmax(NN(torch.tensor(test_x).to(device).type(torch.float)),axis=1).detach().cpu().numpy()      
 ```
 **다른 모델 학습 및 Plot 코드**
 ```python
@@ -330,21 +390,45 @@ from sklearn.ensemble import RandomForestClassifier,AdaBoostClassifier,GradientB
 (X,Y),data = data_preprocess(df)
 (train_x, train_y, test_x, test_y) = data 
 fig, ((ax1, ax2),(ax3,ax4),(ax5,ax6)) = plt.subplots(ncols=2,nrows=3,figsize=(13, 13))
+fig.suptitle('Train data cases',fontsize=25)
 
-metric_list = [] 
+train_metric_list = [] 
+
+for model_func,model_name,ax in zip([LogisticRegression,SGDClassifier,RandomForestClassifier,AdaBoostClassifier,GradientBoostingClassifier],['Logistic','SGD','RF','AB','GB'],[ax1,ax2,ax3,ax4,ax5]):
+    model = model_func()
+    model.fit(train_x,train_y)
+    y_pred = model.predict(train_x)
+    train_metric_list.append(model_metric(model,train_x,train_y))
+    xx1,xx2,Z = make_decision_boundary(train_x,train_y,model,kernel)
+    plot_decion_boundary(xx1,xx2,Z,ax,train_x,train_y,kernel=model_name)
+    
+nn_plot_decision_boundary(train_x,train_y,NN,ax6,'nn') 
+train_metric_list.append(NN_metric(NN,train_x,train_y))
+
+
+
+fig, ((ax1, ax2),(ax3,ax4),(ax5,ax6)) = plt.subplots(ncols=2,nrows=3,figsize=(13, 13))
+fig.suptitle('Test data cases',fontsize=25)
+test_metric_list = [] 
 
 for model_func,model_name,ax in zip([LogisticRegression,SGDClassifier,RandomForestClassifier,AdaBoostClassifier,GradientBoostingClassifier],['Logistic','SGD','RF','AB','GB'],[ax1,ax2,ax3,ax4,ax5]):
     model = model_func()
     model.fit(train_x,train_y)
     y_pred = model.predict(test_x)
-    metric = model_metric(model,test_x,test_y)
+    metric_list.append(model_metric(model,test_x,test_y))
     xx1,xx2,Z = make_decision_boundary(test_x,test_y,model,kernel)
     plot_decion_boundary(xx1,xx2,Z,ax,test_x,test_y,kernel=model_name)
     
 nn_plot_decision_boundary(test_x,test_y,NN,ax6,'nn') 
+test_metric_list.append(NN_metric(NN,test_x,test_y))
+        
         
 ```
-<p align='center'><img src=https://user-images.githubusercontent.com/92499881/198611451-b9e4f2e8-6ac9-4ae2-bbf8-e662631cdb12.png width='80%',h`eight='50%'>`
+<p align='center'><img src = 'https://user-images.githubusercontent.com/92499881/198936659-e9a113e3-2c65-4c8e-b471-c63bdd954676.png' weight='45%',height='45%'>
+<figure class='half'>
+    <p align='center'><img src=https://user-images.githubusercontent.com/92499881/198932995-1d23b322-8f52-4475-b665-a8d6fc64182f.png width='45%',h`eight='50%'>`
+    <img src=https://user-images.githubusercontent.com/92499881/198933131-58efb671-2376-4410-b0e1-d35ef8ee31b7.png width='45%',h`eight='50%'>`
+</figure>  
 
 ### 3.3.2 그래프 분석 
 - 로지스틱 회귀와 SGD classifier의 경우 선형모델이므로 Decision boundary모두 선형으로 형성되어 있는 것을 확인할 수 있다. 반대로 Random forest와 Adaptive boost, Gradient boost 의 경우 선형 모델으 앙상블 모델 이기 때문에 Decision boundary가 완전한 선형도 비선형도 아닌 선형의 계단형태로 나타난다 
