@@ -240,7 +240,7 @@ for kernel,ax in zip(['linear','rbf','sigmoid','poly'],[ax1,ax2,ax3,ax4]):
 ### 3.1.3. 그래프 분석 
 - Linear 커널을 사용한 경우 세 class 사이의 Decision boundary가 모두 선형으로 나타나 있는 것을 알 수 있다. 하지만 데이터들의 차원이 그리 크지 않고 복잡하지 않기 때문에 다른 커널과 비교했을 때 Metric에서 크게 밀리지 않는다. 
 - RBF 커널과 Poly 커널함수를 사용한 경우 실제로도 Decision boundary가 비선형으로 형성된다는 것을 확인할 수 있었다. 하지만 데이터의 차원이 그리 크지 않은 탓에 Metric 면에서 크게 차이가 나지 않았다. 
-- 이상하게도 sigmoid는 아예 분류를 하지 못했으며, Metric에서도 ACC : 0.233으로 매우 낮았다. 이는 Radnom 추출 보다도 못하다라 해도 무방한데, 이는 Sigmoid 함수가 Binary classification에 적합하여 Multi class인 이 케이스와는 적합하지 않기 때문이라 생각된다. 
+- 이상하게도 sigmoid는 아예 분류를 하지 못했으며, Metric에서도 ACC : 0.233으로 매우 낮았다. Radnom 추출 보다도 못하다라 해도 무방한데, 이는 Sigmoid 함수가 Binary classification에 적합하여 Multi class인 이 케이스와는 적합하지 않기 때문이라 생각된다. 
 
 $\space$
 ## 3.2 하이퍼파라미터 C에 따른 비교 
@@ -436,3 +436,5 @@ test_metric_list.append(NN_metric(NN,test_x,test_y))
 ### 3.3.2 그래프 분석 
 - 로지스틱 회귀와 SGD classifier의 경우 선형모델이므로 Decision boundary모두 선형으로 형성되어 있는 것을 확인할 수 있다. 반대로 Random forest와 Adaptive boost, Gradient boost 의 경우 선형 모델의 앙상블 모델 이기 때문에 Decision boundary가 완전한 선형도 비선형도 아닌 선형의 계단형태로 나타난다 
 - Neural Network의 경우 10개의 노드를 가진 3개의 레이어로 구성되어 있는 모델을 사용했으며 비선형 함수 ReLU를 사용했기 때문에 비선형의 Decision boundary로 구성되어 있다고 생각될 수 있으며, 모델 특성 탓 Train 데이터에 overfitting 되어 있다고 생각 된다. 
+- Neural Network의 경우 10개의 노드를 가진 3개의 레이어로 구성되어 있는 모델을 사용했으며 비선형 함수로 ReLU를 사용했다. 앞서 사용한 RBF 커널이나 Polynomial의 경우 보다도 더 비선형 적인 형태를 보이고 있는데 이는 Neural Network가 여러개의 ReLU 함수를 사용하고 있고, Train 데이터에 오버피팅 되는 경향이 강해 나타난 결과라고 생각 된다. 
+                      
