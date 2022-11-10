@@ -1,0 +1,10 @@
+Epochs: 100
+batch_size: 64
+device: cuda:0
+encoded_space_dim: 128
+lr: 0.0001
+save_dir: Base
+save_epoch: 99
+seed: 42
+target_class: 6
+weight_decay: 1.0e-05

@@ -133,3 +133,16 @@ dmypy.json
 .csv 
 .zip 
 *.zip 
+
+*.png 
+.png 
+*.pt 
+.pt 
+.json
+*.json 
+*.wandb
+*gz 
+*-ubyte 
+*.xz 
+*.txt 
+*-run 
