@@ -89,7 +89,7 @@ class Reconstruction_Metric:
             plt.title("ROC curve")
             plt.show()
         
-        return AUROC,[fpr,tpr,threshold]
+        return AUROC,[fpr.tolist(),tpr.tolist(),threshold.tolist()]
 
     def Metric_Score(self,Train_score,Test_score,True_labels):
         Threshold = np.percentile(Train_score,80)
