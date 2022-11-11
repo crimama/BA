@@ -1,0 +1,39 @@
+Dataset_dir: ./Dataset/hazelnut
+Decription: Normalize제외 하고 진행
+Epochs: 50
+batch_size: 32
+best_valid_loss: !!python/object/apply:numpy.core.multiarray.scalar
+- &id001 !!python/object/apply:numpy.dtype
+  args:
+  - f4
+  - false
+  - true
+  state: !!python/tuple
+  - 3
+  - <
+  - null
+  - null
+  - null
+  - -1
+  - -1
+  - 0
+- !!binary |
+  G7oiPQ==
+device: cuda:0
+encoded_space_dim: 256
+img_size: 256
+last_train_loss: !!python/object/apply:numpy.core.multiarray.scalar
+- *id001
+- !!binary |
+  29YvPQ==
+last_valid_loss: !!python/object/apply:numpy.core.multiarray.scalar
+- *id001
+- !!binary |
+  EP0qPQ==
+lr: 0.001
+optimizer: adamw
+save_dir: MVtecAD3
+save_epoch: 47
+seed: 42
+target_class: 6
+weight_decay: 1.0e-05

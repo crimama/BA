@@ -19,16 +19,16 @@ from src import MVtecEncoder,MVtecDecoder,Convolution_Auto_Encoder
 cfg = {'seed':42,
        'img_size':256,
        'device':'cuda:0',
-       'encoded_space_dim':128,
+       'encoded_space_dim':256,
        'lr':0.001,
        'weight_decay':1e-05,
-       'batch_size':32,
+       'batch_size':16,
        'Epochs':100,
        'target_class':6,
-       'save_dir':'MVtecAD3',
+       'save_dir':'MVtecAD4',
        'Dataset_dir':'./Dataset/hazelnut',
        'optimizer':'adamw',
-       'Decription':'Normalize제외 하고 진행'}
+       'Decription':'bATCHSIZE, bottleneck dim 조정'}
 
         
 

@@ -1,0 +1,13 @@
+Dataset_dir: ./Dataset/hazelnut
+Decription: bATCHSIZE, bottleneck dim 조정
+Epochs: 100
+batch_size: 16
+device: cuda:0
+encoded_space_dim: 256
+img_size: 256
+lr: 0.001
+optimizer: adamw
+save_dir: MVtecAD4
+seed: 42
+target_class: 6
+weight_decay: 1.0e-05
