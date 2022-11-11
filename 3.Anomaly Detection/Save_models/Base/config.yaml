@@ -1,10 +1,14 @@
-Epochs: 100
-batch_size: 64
+Dataset_dir: ./Dataset/hazelnut
+Decription: Normalize제외 하고 진행
+Epochs: 50
+aug_number: 6
+batch_size: 32
 device: cuda:0
-encoded_space_dim: 128
-lr: 0.0001
+encoded_space_dim: 256
+img_size: 256
+lr: 0.001
+optimizer: adamw
 save_dir: Base
-save_epoch: 99
 seed: 42
 target_class: 6
 weight_decay: 1.0e-05
