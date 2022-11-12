@@ -121,13 +121,16 @@ def Save_result(cfg):
     machine = Machine_Metric(cfg)
     auto = Reconstruction_Metric(cfg)
 
-    acc,pre,rec,f1 = machine.main()
+    [auroc,roc], [acc,pre,rec,f1] = machine.main()
     [AUROC,ROC], [ACC,PRE,RECALL,F1] = auto.main() 
 
     metric['auto']['auroc'] = AUROC
     metric['auto']['roc'] =  ROC 
     metric['auto']['metric'] =[ACC,PRE,RECALL,F1]
+    metric['machine']['roc'] = roc 
+    metric['machine']['auroc']=auroc 
     metric['machine']['metric']=[acc,pre,rec,f1]
+
 
     with open(f"./Save_models/{cfg['save_dir']}/Metric.json",'w') as f:
        json.dump(metric,f)
@@ -143,7 +146,7 @@ if __name__ == "__main__":
     cfg['aug_number'] = int(args.aug_number)
 
     trans = create_transformation(cfg)
-    wandb.init(project='BA_mvtecad',name=cfg['save_dir'])
+    wandb.init(project='BA_MVtec2',name=cfg['save_dir'])
     wandb.config = cfg
     train_loader,valid_loader,test_loader   = preprocess(cfg,trans)
 #trainig intit 

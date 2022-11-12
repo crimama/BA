@@ -59,7 +59,8 @@ class Reconstruction_Metric:
         Pred_imgs = np.array(Pred_imgs)
         True_imgs = np.array(True_imgs)
         True_labels = np.array(True_labels)
-        True_labels = np.where(True_labels==0,True_labels,1) # Anomaly:1, normal:0 `
+        True_labels = np.where(True_labels==2,True_labels,1)
+        True_labels = np.where(True_labels==1,True_labels,0) # Anomaly:1, normal:0 `
         test_score = np.mean(np.array(Pred_imgs-True_imgs).reshape(len(True_labels),-1)**2,axis=1)
         return test_score, True_labels
 
@@ -163,10 +164,23 @@ class Machine_Metric:
             test_labels.extend(label.detach().cpu().numpy())
         test_vecs = np.array(test_vecs)
         test_labels = np.array(test_labels)
-        test_labels = np.where(test_labels==0,test_labels,-1) # Anomaly:-1, normal:0
-        test_labels = np.where(test_labels==1,test_labels,1) # Anomaly:-1, normal:1
+        #처음 라벨 인코딩 할 때 2가 good 이었음, 2를 제외한 나머지 1:anomaly로 변경 
+        test_labels = np.where(test_labels==2,test_labels,1)  
+        test_labels = np.where(test_labels==1,test_labels,-1) # Anomaly:-1, normal:1
 
         return test_vecs,test_labels 
+
+    def _Metric_auroc_roc(self,Test_score,True_labels,plot=0):
+        fpr,tpr,threshold = roc_curve(True_labels,Test_score,pos_label=1)
+        AUROC = round(auc(fpr, tpr),4)
+
+        if plot != 0:
+            plt.plot(fpr,tpr)
+            plt.title("ROC curve")
+            plt.show()
+        
+        return AUROC,[fpr.tolist(),tpr.tolist(),threshold.tolist()]
+
     def _Metric_score(self,True_labels,Pred_labels):
         ACC = accuracy_score(True_labels,Pred_labels)
         PRE = precision_score(True_labels,Pred_labels)
@@ -184,13 +198,18 @@ class Machine_Metric:
         test_vecs , test_labels = self._test_data_inference()
         normalized_vecs = self.scaling(normal_vecs)
         normalized_test_vecs = self.minmax.transform(test_vecs)
+        self.test_labels = test_labels 
 
 
         self.model = OneClassSVM()
         self.model.fit(normalized_vecs)
         Pred_labels = self.model.predict(normalized_test_vecs)
+        
+        preds = self.model.score_samples(normalized_test_vecs)
+        self.preds = preds 
 
         ACC,PRE,RECALL,F1 = self._Metric_score(test_labels,Pred_labels)
-        return ACC,PRE,RECALL,F1
+        AUROC,ROC = self._Metric_auroc_roc(preds,test_labels)
+        return [AUROC,ROC], [ACC,PRE,RECALL,F1]
 
         

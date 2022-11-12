@@ -27,7 +27,7 @@ def create_transformation(cfg):
 
     aug5 = transforms.Compose([
                             transforms.ToTensor(),
-                            transforms.RandomSolarize(5),
+                            transforms.RandomSolarize(0.1),
                             transforms.Resize((cfg['img_size'],cfg['img_size']))
     ])
     aug6 = transforms.Compose([
