@@ -209,6 +209,9 @@ def Save_result(cfg):
     return metric 
 ```
 **Metric**
+- 학습은 오토인코더 한개만 진행 되지만 Metric은 두가지가 진행 됨 
+- Reconstruction 방식과 Machine learning : OC-SVM 
+- 동일한 학습된 오토인코더를 사용하되 OC-SVM은 인코더만 사용 함 
 ```python
 class Reconstruction_Metric:
     def __init__(self,cfg,augmentation=None):
@@ -454,6 +457,8 @@ print('Metric Done')
 
 
 # 3. 결과 
+- Metric으로는 AUROC를 사용함
+- ACC,Precision,Recall,F1-Score를 측정하였지만 명확한 Threshold를 결정하기 어려워 복합적으로 고려할 수 있는 AUROC를 사용 함 
 ## 3.1 Preprocess : Augmentation에 따른 성능 비교 
 <p align='center'><img src = 'https://user-images.githubusercontent.com/92499881/201528660-1308423c-d6f1-4416-a6d1-624004f48a54.png' width='70%',height='100%'>
 
@@ -462,6 +467,9 @@ print('Metric Done')
    <p align='center'><img src = 'https://user-images.githubusercontent.com/92499881/201528003-c1b27965-ca5a-49f4-8567-0194c2ab8839.png' width='49%',height='30%'>
    <img src = 'https://user-images.githubusercontent.com/92499881/201529458-e01bcb86-7460-4301-b1c4-68af7add49e1.png' width='49%',height='30%'>
 </figure>
+
+**결과 해석**
+
 
 ## 3.2 Postprocess : Augmentation에 따른 성능 비교 
 - 아무런 Augmentation을 적용하지 않은 Baseline AutoEncoder에 Test 데이터 Inference 시 Augmentation 적용
@@ -474,6 +482,8 @@ print('Metric Done')
    <p align='center'><img src = 'https://user-images.githubusercontent.com/92499881/201528506-f8c65f5a-0e67-4b4f-bf91-95ed7b3187e2.png' width='49%',height='30%'>
    <img src = 'https://user-images.githubusercontent.com/92499881/201528520-f4f48f60-b6f5-4b40-a01e-eb91da1f4a78.png' width='49%',height='30%'>
 </figure>
+
+**결과 해석**
 
 ## 3.3 Mixed : Preprocess + Postprocess 
 - Preprocess 와 Postprocess에서 가장 성능이 좋은 Augmentation 종류 각각 뽑아 같이 사용하는 경우 성능 측정 
@@ -489,5 +499,9 @@ print('Metric Done')
    <p align='center'><img src = 'https://user-images.githubusercontent.com/92499881/201528953-7ea03864-25c7-4b1c-958c-2a7e70978fcd.png' width='49%',height='30%'>
    <img src = 'https://user-images.githubusercontent.com/92499881/201529219-76e3385b-9384-401b-bad9-afc310cd7a5f.png' width='49%',height='30%'>
 </figure>
+
+**결과 해석**
+
   
 # 4. 결론 
+- 본 실험을 통해 Augmentation이 Anomaly Detection에 어떤 영향을 끼치는 지 확인을 해 보았다. 적용한 Augmentation 종류에 따라 성능 차이는 컸으며 
