@@ -20,8 +20,8 @@
 
 
 # 2. 실험 : Augmentation에 따른 Anomaly Detection 성능 비교  
-- Augmentation이란 한정된 데이터의 양을 늘리기 위해 원본에 각종 변환을 적용하여 데이터를 증강시키는 기법입니다. 일반적으로 학습 전 이미지에 변형을 가하는 형식으로 사용 됩니다. 
-- 이번 파트에서는 이 Augmentation을 Anomaly Detection에 적용하여 성능이 어떻게 변화하는지 확인하고자 합니다. 
+- Augmentation이란 한정된 데이터의 양을 늘리기 위해 원본에 각종 변환을 적용하여 데이터를 증강시키는 기법입니다. 일반적으로 학습 전 이미지에 변형을 가하는 전처리 형식으로 사용 됩니다. 
+- 이 Augmentation이 Anomaly Detection에 적용되었을 때 성능이 어떻게 변화하는지 확인하고자 합니다. 
 - 사용된 베이스라인은 AutoEncoder와 OC-SVM으로, OC-SVM은 학습된 AutoEncoder의 인코더로 추출된 임베딩 벡터를 인풋으로 사용합니다. 
 - 실험을 통해 확인하고자 하는 바는 아래와 같습니다. 
 ```
@@ -29,10 +29,14 @@
     2. Augmentation 종류에 따른 Anomaly Detection 성능 차이 
     3. Postprocess로 Test 데이터 inference 시 Augmentation 적용에 따른 성능 변화 
 ```
+$\space$
+
 ## 2.0. 실험 세팅 
 **Train** 
 - 기본 Baseline model을 Convolution Auto Encoder를 사용하며 loss function으로는 reconstruction error : l2 norm을 사용합니다. 사용하는 데이터셋은 MVtecAD의 hazelnut 데이터셋을 사용합니다. 
+  
 - Auto Encoder를 학습시킬 때는 Anomaly-free Training data를 사용하며 Test data inference 시에는 Normal - Anoaml 만 분류합니다. (세부적인 Anomaly category 무시)
+  
 - 적용되는 Augmentation 종류는 아래와 같습니다. 
   - Identical (No any Augmentation)
   - RandomCrop 
@@ -48,6 +52,11 @@
 2. Machine Learning 
    - Machine Learning 방식은 Reconstruction 방식과 마찬가지로 AutoEncoder를 학습시킨 뒤 Encoder를 이용해 각 Test 이미지의 Embedding Vector를 추출하여 이를 Input으로 사용하 Machine learning에 적용합니다. 
    - 이 경우 먼저 Train 데이터로 OC-SVM을 학습시킨 뒤 Test 데이터를 Inference합니다. 
+- Metric 
+  - 성능 비교를 위해 AUROC를 사용합니다. 
+  - Normal 과 Anomal간의 class 비율이 imbalance하며 anomaly score를 normal과 anomal로 구분할 Threshold를 따로 결정하지 않더라도 성능을 비교할 수 있기 때문에 선택하였습니다. 
+
+$\space$
 
 ## 2.1. 베이스라인 
 **전처리 및 데이터 로더**
@@ -455,10 +464,9 @@ metric = Save_result(cfg)
 print('Metric Done')
 ```
 
+$\space$
 
 # 3. 결과 
-- Metric으로는 AUROC를 사용함
-- ACC,Precision,Recall,F1-Score를 측정하였지만 명확한 Threshold를 결정하기 어려워 복합적으로 고려할 수 있는 AUROC를 사용 함 
 ## 3.1 Preprocess : Augmentation에 따른 성능 비교 
 <p align='center'><img src = 'https://user-images.githubusercontent.com/92499881/201528660-1308423c-d6f1-4416-a6d1-624004f48a54.png' width='70%',height='100%'>
 
@@ -468,7 +476,10 @@ print('Metric Done')
    <img src = 'https://user-images.githubusercontent.com/92499881/201529458-e01bcb86-7460-4301-b1c4-68af7add49e1.png' width='49%',height='30%'>
 </figure>
 
-**결과 해석**
+**결과 분석**
+- Reconstruction과 OC-SVM 모두 Augmentation을 적용했을 때 대체로 성능이 좋아지는 것을 확인할 수 있었음 
+- 대체로 Reconstruction 보다 OC-SVM이 성능ㅇ ㅣ더 좋음 
+
 
 
 ## 3.2 Postprocess : Augmentation에 따른 성능 비교 
@@ -483,7 +494,10 @@ print('Metric Done')
    <img src = 'https://user-images.githubusercontent.com/92499881/201528520-f4f48f60-b6f5-4b40-a01e-eb91da1f4a78.png' width='49%',height='30%'>
 </figure>
 
-**결과 해석**
+**결과 분석**
+- Reconstruction의 경우 Preprocess로 적용한 경우 보다 Postprocess로 적용한 경우 성능이 더 좋게 나타난다 
+- 반대로 OC-SVM의 경우 성능 향상 폭이 Pre-process만큼 크지 않다 
+
 
 ## 3.3 Mixed : Preprocess + Postprocess 
 - Preprocess 와 Postprocess에서 가장 성능이 좋은 Augmentation 종류 각각 뽑아 같이 사용하는 경우 성능 측정 
@@ -500,7 +514,10 @@ print('Metric Done')
    <img src = 'https://user-images.githubusercontent.com/92499881/201529219-76e3385b-9384-401b-bad9-afc310cd7a5f.png' width='49%',height='30%'>
 </figure>
 
-**결과 해석**
+**결과 분석**
+- 꽤나 큰 성능 향상 폭을 보이는데 Reconstruction, OC-SVM 모두 Preprocess만 적용한 경우, Post process만 적용한 경우 보다도 두개 모두 적용한 경우 더 나은 성능을 보인다. 
+- 특히 OC-SVM의 경우 65%향상이라는 놀라운 결과를 보여준다. 
+
 
   
 # 4. 결론 
