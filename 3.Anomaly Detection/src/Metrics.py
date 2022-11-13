@@ -34,7 +34,7 @@ class Reconstruction_Metric:
         train_dirs = Data_dir.train_load()
         test_dirs,test_labels = Data_dir.test_load()
 
-        train_dset = MVtecADDataset(cfg,train_dirs,Augmentation=augmentation)
+        train_dset = MVtecADDataset(cfg,train_dirs,Augmentation=None)
         test_dset = MVtecADDataset(cfg,test_dirs,test_labels,Augmentation=augmentation)
 
         train_loader = DataLoader(train_dset,batch_size=cfg['batch_size'],shuffle=True)
@@ -126,7 +126,7 @@ class Machine_Metric:
         train_dirs = Data_dir.train_load()
         test_dirs,test_labels = Data_dir.test_load()
 
-        train_dset = MVtecADDataset(cfg,train_dirs,Augmentation=augmentation)
+        train_dset = MVtecADDataset(cfg,train_dirs,Augmentation=None)
         test_dset = MVtecADDataset(cfg,test_dirs,test_labels,Augmentation=augmentation)
 
         train_loader = DataLoader(train_dset,batch_size=cfg['batch_size'],shuffle=True)
