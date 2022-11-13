@@ -21,21 +21,7 @@ from src import Machine_Metric,Reconstruction_Metric
 from src import create_transformation
 from src.set_transformation import create_transformation
 
-#Default Config 
-cfg = {'seed':42,
-       'img_size':256,
-       'aug_number':0,
-       'device':'cuda:0',
-       'encoded_space_dim':256,
-       'lr':0.001,
-       'weight_decay':1e-05,
-       'batch_size':32,
-       'Epochs':50,
-       'target_class':6,
-       'save_dir':'MVtecAD3',
-       'Dataset_dir':'./Dataset/hazelnut',
-       'optimizer':'adamw',
-       'Decription':'Normalize제외 하고 진행'}
+
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
@@ -76,7 +62,7 @@ def train_epoch(model,dataloader,criterion,optimizer,scheduler,scaler):
               img = img.to(cfg['device']).type(torch.float32)
               with torch.cuda.amp.autocast():
                     y_pred = model(img).type(torch.float32)
-                    loss = torch.sqrt(criterion(img,y_pred))
+                    loss = criterion(img,y_pred)
               #y_pred = model(img).type(torch.float32)
               
 
