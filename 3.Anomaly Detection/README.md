@@ -6,6 +6,9 @@
 - [Anomaly Detection](#anomaly-detection)
 - [Table of Contents](#table-of-contents)
 - [1. Anomaly Detection 이론](#1-anomaly-detection-이론)
+  - [1.1. Anomaly Data의 정의 및 특성](#11-anomaly-data의-정의-및-특성)
+  - [1.2. Autoencoder](#12-autoencoder)
+  - [1.3 Autoencoder를 이용한 Anomaly Detection](#13-autoencoder를-이용한-anomaly-detection)
 - [2. 실험 : Augmentation에 따른 Anomaly Detection 성능 비교](#2-실험--augmentation에-따른-anomaly-detection-성능-비교)
   - [2.0. 실험 세팅](#20-실험-세팅)
   - [2.1. 베이스라인](#21-베이스라인)
@@ -17,8 +20,79 @@
 
 $\space$
 
-# 1. Anomaly Detection 이론 
-- Anomaly Detection 이란 정상 데이터 속 이상, novel 데이터를 탐지하는 방법론 
+# 1. Anomaly Detection 이론
+
+<p align='center'><img src = 'https://user-images.githubusercontent.com/92499881/201667850-4c6a54ad-94c5-43bb-93fe-df0194236f93.png' width='40%',height='40%'>
+
+<center>대표적인 Anomaly Detection Dataset : MVtecAD</center>  
+<center>같은 Anomaly로 분류되더라도 그 세부적인 형태는 모두 다르다.</center>
+
+$\space$
+
+## 1.1. Anomaly Data의 정의 및 특성
+- Anomaly Detection 이란 단어 그대로 전체 데이터 중 이상치(Anomaly)를 탐지하는 것을 목적으로 하는 태스크를 말한다. 이상치(Anomaly)는 정상 데이터 분포 속 매우 낮은 확률로 나타나는 데이터를 말하며, 어떻게 정의하냐에 따라 Outlier, Novelty로 불리기도 한다. 
+  
+- 일반적인 분류 방법을 통해 탐지를 할 수 없는데, 이는 Anomaly의 고유의 특성 때문이다. Anoamly Data의 특징은 크게 두가지를 뽑을 수 있는데, 첫번째는 Imbalanced 하다는 점이다. 일반적으로 정상 데이터 분포 속 이상치는 매우 낮은 확률로 발생하게 되고 이상치 데이터를 수집했다 하더라도 그 수는 정상 데이터 수에 비해 굉장히 낮다. 따라서 일반적인 분류 방법으로 모델을 만들 경우 이상치에 대한 정보를 모델은 학습할 수 없고 normal - anomal 간의 decision boundary를 만들 수 없게 된다. 
+  
+- 두번째 특징은 anomaly들은 모두 각기 다른 특징을 갖고 있다는 점이다. Anomaly Detection task에서는 데이터를 normal - anomaly로 이진 분류를 하지만 실제 Anomaly data 내에서는 각 데이터 마다 다른 특징들을 갖고 있다. Anomaly가 발생하는 이유는 굉장히 다양하며, 그 다양한 이유에서 발생되는 Anomaly Data 또한 각기 다른 특징을 갖게 된다. 
+- 따라서 Anomaly Detection 방법론은 대부분 Anomaly 가 없는 Anomaly-free normal 데이터로만 학습을 하여 Normal data의 manifold를 형성한 뒤 새로운 데이터가 들어왔을 때 normal 데이터의 범주 안에 있지 않으면 Anomaly로 판별하는 식의 방법을 사용한다. 
+
+**Anomaly Detection Method** 
+- Anomaly Detection의 방법론은 크게 3개로 분류할 수 있다. 
+  - Density-based 
+  - Distance-based 
+  - Model-based 
+- 위 방법론 범주 중 여기서 다루고자 하는 것은 Model-base의 **Autoencoder** 이다. 
+
+$\space$
+
+## 1.2. Autoencoder
+
+<figure class='half'>
+    <p align='center'><img src = 'https://user-images.githubusercontent.com/92499881/201670009-d3e2128d-7d5f-4ab8-b412-a920c55c17a1.png' width='45%',height='50%'>
+    <img src = 'https://user-images.githubusercontent.com/92499881/201671565-a7e5bf68-de12-466b-9c54-03002d93fab9.png' width='45%',height='50%'>
+</figure>
+<center>좌 : Autoencoder 구조 | 우 : Mnist를 이용하여 Autoencoder 학습한 결과</center>
+<center>출처 : 강필성 교수님 비즈니스 애널리틱스 강의 자료</center>
+
+$\space$
+
+- Autoencoder란 대칭 구조를 갖고 있는 인코더와 디코더를 연결한 인공 신경망 구조로, 입력과 출력이 동일하다. 
+- 인코더는 Input 데이터를 Embedding Vector를 압축하며, 디코더는 압축된 Embedding vector를 Input으로 받아 원래 데이터로 복원하는 구조로 학습이 진행된다. 
+- 오토 인코더는 반드시 입력 변수의 수 보다 은닉 노드의 수가 더 적은 은닉 층이 있어야 하는데 이를 bottleneck layer 라고 한다. 
+- 이러한 구조를 갖는 이유는 동일한 수의 노드를 갖게 되면 해당 Bottleneck layer는 단순히 입력을 외우게 되며 복원을 위한 Feature를 학습할 수 없게 되며, 오버피팅이 되는 것과 동일한 현상이 나타난다. 
+- 기본적인 layer로는 MLP를 사용하지만 Convolution layer를 이용하여 Convolution Autoencoder를 만들 수 있다. 이 경우 디코더는 Convolution Transpose를 사용하거나 Upsampling 을 사용하여 데이터를 복원하게 된다. 
+
+$\space$
+
+## 1.3 Autoencoder를 이용한 Anomaly Detection 
+<figure class='half'>
+    <p align='center'><img src = 'https://user-images.githubusercontent.com/92499881/201673002-ee8d6909-9a0f-48f7-8d04-f5ae8d1938c8.png' width='45%',height='50%'>
+    <img src = 'https://user-images.githubusercontent.com/92499881/201673015-31544a86-cc4e-403c-a6e0-fd013811a586.png' width='45%',height='50%'>
+</figure>
+<center>좌 : Reconstruction 방식 | 우 : Machine Learning 방식</center>
+<center>출처 : 강필성 교수님 비즈니스 애널리틱스 강의 자료</center>
+
+$\space$
+
+- Autoencoder를 이용한 Anomaly Detection은 다양한 방법론이 있지만 학습된 Autoencoder를 어떻게 사용하냐에 따라 크게 두가지로 나눌 수 있다. 
+    1. 학습된 Autoencoder를 모두 사용하는 Reconstruction 방식 
+    2. 학습된 Encoder만을 이용하는 Machine Learning 방식 
+
+**Reconstruction Method**
+- Reconstruction 방식이란 Autoencoder를 통해 이미지를 Inference시킬 경우 복원된 이미지가 원래 이미지와의 차이를 이용해 Anomaly Detection을 하는 방식이다. Autoencoder는 Anomaly-free normal 데이터로만 학습 시키며 따라서 normal에 대한 정보만을 학습하게 된다. 이 경우 Autoencoder가 경험해 보지 못 한 Anomaly를 갖는 데이터가 input으로 들어오는 경우 정상적으로 복원 하는 것에 실패하게 된다. 
+- 즉 Input 데이터와 Autoencoder 가 복원한 Output 데이터 간의 차이를 이용하여 Anomaly Detection을 수행하게 되며 l2 Norm, Cosine Similarity 등을 이용하여 Anomaly Score를 계산하게 된다. 
+- 원본 이미지와 복원된 이미지 간의 차이를 Pixel 단위로 측정하여 Anomaly score를 산출할 수 있으므로 어느 특정 region, pixel이 anomaly인지 쉽게 알 수 있다는 장점이 있다. 
+- 하지만 입력에 대한 약간의 변형에도 모델이 민감하게 반응하며, 최근에는 Test data 역시도 정상적으로 복원 해 내는 문제점이 두드러지고 있다. 
+
+**Machine learning** 
+- Machine learning 방식이란 학습된 Autoencoder의 Encoder를 통해 얻어진 Embedding vectors를 이용하여 Anomaly detection을 수행하는 방식이다. 앞서 Reconstruction 방식과 마찬가지로 Anomaly-free normal 데이터로만 학습 된 Autoencoder를 사용하며 해당 Autoencoder의 encoder는 Input 이미지의 Feature를 추출하는 역할을 하게 된다. 
+- 추출된 Features들은 Input 데이터의 Representation으로 사용되며 OC-SVM 이나 Isolation forest, SVDD와 같은 Machine learning 기반의 Anomaly detection 방법론을 통해 Anomaly Detection을 수행하게 된다. 
+  
+
+
+
+
 
 $\space$
 
@@ -141,7 +215,7 @@ class MVtecADDataset(Dataset):
         pass
     torch.manual_seed(cfg['seed'])
     data_dir = cfg['Dataset_dir']
-    Data_dir = Datadir_init()
+    Data_dir = Datadir_init(data_dir)
     train_dirs = Data_dir.train_load()
     test_dirs,test_labels = Data_dir.test_load()
     indx = int(len(train_dirs)*0.8)
@@ -209,7 +283,7 @@ def create_transformation(cfg):
 - Convolution Autoencoder는 대칭 구조로 인코더와 디코더로 구성되어 있음 
 - 인코더는 Convolution layer를 기본으로 하며 `stride=2` 를 통해 Input 이 Downsampling이 되고 linear projection을 통해 embedding vector를 추출 함 
 - 디코더는 Conovlution Transpose layer를 기본으로 하며 Input으로 embedding vector를 받으며 Convolution transpose에 적용할 수 있도록 reshape, unflatten을 거친뒤 ConvTranspose(`stride=2`)를 통해 Upsampling이 된다. 
-- 
+  
 ```python
 class MVtecEncoder(nn.Module):
     def __init__(self,encoded_space_dim):
@@ -217,16 +291,17 @@ class MVtecEncoder(nn.Module):
 
         self.encoder_cnn = nn.Sequential(
                                         nn.Conv2d(in_channels=3,out_channels=8,kernel_size=3,stride=2,padding=1),
+                                        nn.BatchNorm2d(8),
                                         nn.ReLU(),
                                         nn.Conv2d(in_channels=8,out_channels=16,kernel_size=3,stride=2,padding=1),
                                         nn.BatchNorm2d(16),
                                         nn.ReLU(),
                                         nn.Conv2d(in_channels=16,out_channels=32,kernel_size=3,stride=2,padding=1),
+                                        nn.BatchNorm2d(32),
                                         nn.ReLU(),
-                                        nn.BatchNorm2d(16),
                                         nn.Conv2d(in_channels=32,out_channels=64,kernel_size=3,stride=2,padding=1),
                                         nn.ReLU(),
-                                        nn.BatchNorm2d(16),
+                                        nn.BatchNorm2d(64),
                                         nn.Conv2d(in_channels=64,out_channels=128,kernel_size=3,stride=2,padding=1),
                                         nn.ReLU()
 )
@@ -678,3 +753,4 @@ $\space$
 
 # 4. 결론 
 - 본 실험을 통해 Augmentation이 Anomaly Detection에 어떤 영향을 끼치는 지 확인을 해 보았다. 적용한 Augmentation 종류에 따라 성능 차이는 컸으며 
+- 다만 이 실험을 통해 무조건 Augmentation이 Anomaly Detection에 항상 좋다고 말할 수 없다. 이 실험에서는 해당 데이터 셋이 운이 좋게 Augmentation을 적용함에 따라 normal 과 anomal 간의 distinct boundary가 멀어짐에 따라 성능이 좋아진다고 생각할 수 있으며, 다른 데이터셋이나 Augmentation에 따른 영향은 추가적인 실험이 필요하다. 
