@@ -15,9 +15,12 @@
   - [3.3 Mixed : Preprocess + Postprocess](#33-mixed--preprocess--postprocess)
 - [4. 결론](#4-결론)
 
+$\space$
+
 # 1. Anomaly Detection 이론 
 - Anomaly Detection 이란 정상 데이터 속 이상, novel 데이터를 탐지하는 방법론 
 
+$\space$
 
 # 2. 실험 : Augmentation에 따른 Anomaly Detection 성능 비교  
 - Augmentation이란 한정된 데이터의 양을 늘리기 위해 원본에 각종 변환을 적용하여 데이터를 증강시키는 기법입니다. 일반적으로 학습 전 이미지에 변형을 가하는 전처리 형식으로 사용 됩니다. 
@@ -669,7 +672,7 @@ $\space$
 ```
 결과 분석
 - 꽤나 큰 성능 향상 폭을 보이는데 Reconstruction, OC-SVM 모두 Preprocess만 적용한 경우, Post process만 적용한 경우 보다도 두개 모두 적용한 경우 더 나은 성능을 보인다. 
-- 특히 OC-SVM의 경우 65%향상이라는 놀라운 결과를 보여준다.  
+- 특히 OC-SVM의 경우 65%향상이라는 놀라운 결과를 보여준다. 
 ```
 
 
