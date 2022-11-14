@@ -65,6 +65,71 @@ $\space$
 - 이미지 디렉토리와 라벨을 이용해 데이터셋 및 로더 생성 
 - Augmentation은 Train 데이터에만 적용 됨 
 ```python
+#Datadir_init : 데이터 폴더로 부터 이미지 디렉토리와 라벨 가져오는 클래스 
+class Datadir_init:
+    def __init__(self,Dataset_dir='./Dataset/hazelnut'):
+        self.Dataset_dir = Dataset_dir 
+        
+    def test_load(self):
+        test_label_unique = pd.Series(sorted(glob(f'{self.Dataset_dir}/test/*'))).apply(lambda x : x.split('/')[-1]).values
+        test_label_unique = {key:value for value,key in enumerate(test_label_unique)}
+        self.test_label_unique = test_label_unique 
+
+        test_dir = f'{self.Dataset_dir}/test/'
+        label = list(test_label_unique.keys())[0]
+
+        test_img_dirs = [] 
+        test_img_labels = [] 
+        for label in list(test_label_unique.keys()):
+            img_dir = sorted(glob(test_dir +f'{label}/*'))
+            img_label = np.full(len(img_dir),test_label_unique[label])
+            test_img_dirs.extend(img_dir)
+            test_img_labels.extend(img_label)
+        return np.array(test_img_dirs),np.array(test_img_labels) 
+
+    def train_load(self):
+        train_img_dirs = sorted(glob(f'{self.Dataset_dir}/train/good/*.png'))
+        return np.array(train_img_dirs) 
+
+#MVtecADDataset : 앞서 읽어온 이미지 디렉토리와 라벨 데이터를 Datset으로 만들어 주는 클래스 
+class MVtecADDataset(Dataset):
+    def __init__(self,cfg,img_dirs,labels=None,Augmentation=None):
+        super(MVtecADDataset,self).__init__()
+        self.cfg = cfg 
+        self.dirs = img_dirs 
+        self.augmentation = self.__init_aug__(Augmentation)
+        self.labels = self.__init_labels__(labels)
+
+    def __len__(self):
+        return len(self.dirs)
+
+    def __init_labels__(self,labels):
+        if np.sum(labels) !=None:
+            return labels 
+        else:
+            return np.zeros(len(self.dirs))
+    
+    def __init_aug__(self,Augmentation):
+        if Augmentation == None:
+            augmentation = transforms.Compose([
+                                                transforms.ToTensor(),
+                                                transforms.Resize((self.cfg['img_size'],self.cfg['img_size']))
+                                                #transforms.Normalize((0.485, 0.456, 0.406), (0.229, 0.224, 0.225))
+                                            ])
+        else: 
+            augmentation = Augmentation 
+        return augmentation                                      
+
+    def __getitem__(self,idx):
+        img_dir = self.dirs[idx]
+        img = Image.open(img_dir)
+        img = self.augmentation(img)
+
+        if np.sum(self.labels) !=None:
+            return img,self.labels[idx] 
+        else:
+            return img
+#preprocess : Datadir 클래스로 이미지 디렉토리를 읽어오고 Train-valid split한 뒤 Dataset, Dataloader를 생성 함 
  def preprocess(cfg,augmentation=None):
     #mk save dir 
     try:
@@ -136,6 +201,91 @@ def create_transformation(cfg):
     Transformation_set = {} 
     Transformation_set = { key:value for key,value in enumerate([aug1,aug2,aug3,aug4,aug5,aug6,aug_default])}
     return  Transformation_set[cfg['aug_number']]
+```
+**모델구성** 
+- Convolution Autoencoder는 대칭 구조로 인코더와 디코더로 구성되어 있음 
+- 인코더는 Convolution layer를 기본으로 하며 `stride=2` 를 통해 Input 이 Downsampling이 되고 linear projection을 통해 embedding vector를 추출 함 
+- 디코더는 Conovlution Transpose layer를 기본으로 하며 Input으로 embedding vector를 받으며 Convolution transpose에 적용할 수 있도록 reshape, unflatten을 거친뒤 ConvTranspose(`stride=2`)를 통해 Upsampling이 된다. 
+- 
+```python
+class MVtecEncoder(nn.Module):
+    def __init__(self,encoded_space_dim):
+        super(MVtecEncoder,self).__init__()
+
+        self.encoder_cnn = nn.Sequential(
+                                        nn.Conv2d(in_channels=3,out_channels=8,kernel_size=3,stride=2,padding=1),
+                                        nn.ReLU(),
+                                        nn.Conv2d(in_channels=8,out_channels=16,kernel_size=3,stride=2,padding=1),
+                                        nn.BatchNorm2d(16),
+                                        nn.ReLU(),
+                                        nn.Conv2d(in_channels=16,out_channels=32,kernel_size=3,stride=2,padding=1),
+                                        nn.ReLU(),
+                                        nn.BatchNorm2d(16),
+                                        nn.Conv2d(in_channels=32,out_channels=64,kernel_size=3,stride=2,padding=1),
+                                        nn.ReLU(),
+                                        nn.BatchNorm2d(16),
+                                        nn.Conv2d(in_channels=64,out_channels=128,kernel_size=3,stride=2,padding=1),
+                                        nn.ReLU()
+)
+
+        self.flatten = nn.Flatten(start_dim=1)
+        self.encoder_lin = nn.Sequential(
+                                        nn.Linear(8*8*128,512),
+                                        nn.ReLU(True),
+                                        nn.Linear(512,encoded_space_dim)
+                                        )
+        
+
+    def forward(self,x):
+        x = self.encoder_cnn(x)
+        x = self.flatten(x)
+        x = self.encoder_lin(x)
+        return x 
+
+class MVtecDecoder(nn.Module):
+    def __init__(self,encoded_space_dim):
+        super(MVtecDecoder,self).__init__()       
+
+        self.decoder_lin = nn.Sequential(
+            nn.Linear(encoded_space_dim,512),
+            nn.ReLU(True),
+            nn.Linear(512,7*7*128),
+            nn.ReLU(True)
+        )
+        self.unflatten = nn.Unflatten(dim=1,unflattened_size=(128,7,7))      
+
+        self.decoder_cnn = nn.Sequential(
+                            nn.ConvTranspose2d(128,64,3,stride=2,output_padding=1),
+                            nn.BatchNorm2d(64),
+                            nn.ReLU(True),
+                            nn.ConvTranspose2d(64,32,3,stride=2,padding=1,output_padding=1),
+                            nn.BatchNorm2d(32),
+                            nn.ReLU(True),
+                            nn.ConvTranspose2d(32,16,3,stride=2,padding=1,output_padding=1),
+                            nn.BatchNorm2d(16),
+                            nn.ReLU(True),
+                            nn.ConvTranspose2d(16,8,3,stride=2,padding=1,output_padding=1),
+                            nn.BatchNorm2d(8),
+                            nn.ReLU(True),
+                            nn.ConvTranspose2d(8,3,3,stride=2,padding=1,output_padding=1)
+        )
+    def forward(self,x):
+        x = self.decoder_lin(x)
+        x = self.unflatten(x)
+        x = self.decoder_cnn(x)
+        x = torch.sigmoid(x)
+        return x 
+
+class Convolution_Auto_Encoder(nn.Module):
+    def __init__(self,Encoder,Decoder,encoded_space_dim ):
+        super(Convolution_Auto_Encoder,self).__init__()
+        self.encoder = Encoder(encoded_space_dim)
+        self.decoder = Decoder(encoded_space_dim)
+
+    def forward(self,x):
+        x = self.encoder(x)
+        x = self.decoder(x)
+        return x         
 ```
 
 **학습**
@@ -476,10 +626,11 @@ $\space$
    <img src = 'https://user-images.githubusercontent.com/92499881/201529458-e01bcb86-7460-4301-b1c4-68af7add49e1.png' width='49%',height='30%'>
 </figure>
 
-**결과 분석**
+```
+결과 분석
 - Reconstruction과 OC-SVM 모두 Augmentation을 적용했을 때 대체로 성능이 좋아지는 것을 확인할 수 있었음 
 - 대체로 Reconstruction 보다 OC-SVM이 성능ㅇ ㅣ더 좋음 
-
+```
 
 
 ## 3.2 Postprocess : Augmentation에 따른 성능 비교 
@@ -494,10 +645,11 @@ $\space$
    <img src = 'https://user-images.githubusercontent.com/92499881/201528520-f4f48f60-b6f5-4b40-a01e-eb91da1f4a78.png' width='49%',height='30%'>
 </figure>
 
-**결과 분석**
+```
+결과 분석
 - Reconstruction의 경우 Preprocess로 적용한 경우 보다 Postprocess로 적용한 경우 성능이 더 좋게 나타난다 
 - 반대로 OC-SVM의 경우 성능 향상 폭이 Pre-process만큼 크지 않다 
-
+```
 
 ## 3.3 Mixed : Preprocess + Postprocess 
 - Preprocess 와 Postprocess에서 가장 성능이 좋은 Augmentation 종류 각각 뽑아 같이 사용하는 경우 성능 측정 
@@ -514,10 +666,11 @@ $\space$
    <img src = 'https://user-images.githubusercontent.com/92499881/201529219-76e3385b-9384-401b-bad9-afc310cd7a5f.png' width='49%',height='30%'>
 </figure>
 
-**결과 분석**
+```
+결과 분석
 - 꽤나 큰 성능 향상 폭을 보이는데 Reconstruction, OC-SVM 모두 Preprocess만 적용한 경우, Post process만 적용한 경우 보다도 두개 모두 적용한 경우 더 나은 성능을 보인다. 
 - 특히 OC-SVM의 경우 65%향상이라는 놀라운 결과를 보여준다. 
-
+```
 
   
 # 4. 결론 
