@@ -86,6 +86,7 @@ class MVtecADDataset(Dataset):
 class Datadir_init:
     def __init__(self,Dataset_dir='./Dataset/hazelnut'):
         self.Dataset_dir = Dataset_dir 
+        
     def test_load(self):
         test_label_unique = pd.Series(sorted(glob(f'{self.Dataset_dir}/test/*'))).apply(lambda x : x.split('/')[-1]).values
         test_label_unique = {key:value for value,key in enumerate(test_label_unique)}
