@@ -583,8 +583,11 @@ $\space$
 
 ```
 결과 분석
-- 꽤나 큰 성능 향상 폭을 보이는데 Reconstruction, OC-SVM 모두 Preprocess만 적용한 경우, Post process만 적용한 경우 보다도 두개 모두 적용한 경우 더 나은 성능을 보인다. 
-- 특히 OC-SVM의 경우 65%향상이라는 놀라운 결과를 보여준다. 
+- Carpet 데이터의 Reconstruction 방법을 제외하곤 Preprocess-Postprocess를 모두 적용한 경우 성능 향상을 보이는데 꽤 큰 성능 향상을 보여주고 있다
+- 특히 Carpet 데이터의 OC-SVM 방법론의 경우 0.862라는 높은 수치를 보여주고 있는데 단순한 패턴을 가지고 있는 데이터셋에 Flip을 적용함으로써 모델이 다양한 
+  Feature를 포착할 수 있었던 것은 아닌가 라는 생각이 든다. 
+- 하지만 반대로 Flip은 Rotate나 Crop과 같은 다른 morphology 변형 방법들과는 달리 수직, 수평으로 뒤집는 단순한 방법이기 때문에 앞서 말한 가설이 맞는지에 
+  대한 의문도 같이 들기도 한다. 
 ```
 **전체 결과**
  <p align='center'><img src = 'https://user-images.githubusercontent.com/92499881/202166647-fa1b09d0-bbd6-48a5-b713-8c560b43d089.png'>
