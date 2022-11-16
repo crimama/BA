@@ -3,8 +3,6 @@
 - Part 2에서는 Anomaly Detection과 Augmentation에 관련된 실험을 진행합니다.
 
 # Table of Contents 
-- [Anomaly Detection](#anomaly-detection)
-- [Table of Contents](#table-of-contents)
 - [1. Anomaly Detection 이론](#1-anomaly-detection-이론)
   - [1.1. Anomaly Data의 정의 및 특성](#11-anomaly-data의-정의-및-특성)
   - [1.2. Autoencoder](#12-autoencoder)
