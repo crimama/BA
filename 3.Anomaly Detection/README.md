@@ -17,6 +17,7 @@
   - [3.2 Postprocess : 모델 학습 후 Test 데이터에 Augmentation을 적용하는 경우](#32-postprocess--모델-학습-후-test-데이터에-augmentation을-적용하는-경우)
   - [3.3 Mixed : Preprocess + Postprocess](#33-mixed--preprocess--postprocess)
 - [4. 결론](#4-결론)
+- [Appendix:Eaxmple](https://github.com/crimama/BA/tree/main/3.Anomaly%20Detection/Example)
 $\space$
 
 # 1. Anomaly Detection 이론
