@@ -3,6 +3,8 @@
 - Part 2에서는 Anomaly Detection과 Augmentation에 관련된 실험을 진행합니다.
 
 # Table of Contents 
+- [Anomaly Detection](#anomaly-detection)
+- [Table of Contents](#table-of-contents)
 - [1. Anomaly Detection 이론](#1-anomaly-detection-이론)
   - [1.1. Anomaly Data의 정의 및 특성](#11-anomaly-data의-정의-및-특성)
   - [1.2. Autoencoder](#12-autoencoder)
@@ -15,7 +17,6 @@
   - [3.2 Postprocess : 모델 학습 후 Test 데이터에 Augmentation을 적용하는 경우](#32-postprocess--모델-학습-후-test-데이터에-augmentation을-적용하는-경우)
   - [3.3 Mixed : Preprocess + Postprocess](#33-mixed--preprocess--postprocess)
 - [4. 결론](#4-결론)
-- [Appendix:Eaxmple](https://github.com/crimama/BA/tree/main/3.Anomaly%20Detection/Example)
 $\space$
 
 # 1. Anomaly Detection 이론
