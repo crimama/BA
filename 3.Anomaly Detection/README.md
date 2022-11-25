@@ -19,6 +19,8 @@
 - [4. 결론](#4-결론)
 $\space$
 
+- 데이터셋 : https://www.mvtec.com/company/research/datasets/mvtec-ad
+
 # 1. Anomaly Detection 이론
 
 <p align='center'><img src = 'https://user-images.githubusercontent.com/92499881/201667850-4c6a54ad-94c5-43bb-93fe-df0194236f93.png' width='40%',height='40%'>
