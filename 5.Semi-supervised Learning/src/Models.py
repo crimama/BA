@@ -19,18 +19,13 @@ class Model(nn.Module):
         return encoder 
     
     def output_layer(self,dataset_name):
+        in_features = list(self.encoder[-2][-1].children())[-3].out_channels
         if dataset_name == 'cifar10':
-            if self.model_name == 'ssl_resnet50':
-                return nn.Linear(in_features = 2048,out_features= 10)
-            else:
-                return nn.Linear(in_features = 512,out_features= 10)
+            return nn.Linear(in_features = in_features,out_features= 10)
         else:
-            if self.model_name == 'ssl_resnet50':
-                return nn.Linear(in_features = 2048,out_features= 100)
-            else:
-                return nn.Linear(in_features = 512,out_features= 100)
+            return nn.Linear(in_features = in_features,out_features= 100)
         
-    def forward(self,x):
+    def forward(self,x,_):
         x = self.encoder(x)
         x = self.linear(x)
         return x 
@@ -42,6 +37,7 @@ class GaussianNoise(nn.Module):
         self.shape = (batch_size,) + input_shape
         self.noise = Variable(torch.zeros(self.shape)).to(device)
         self.std = std
+        
         
     def forward(self, x):
         self.noise.data.normal_(0, std=self.std)
@@ -56,6 +52,8 @@ class PiModel(nn.Module):
         self.conv2 = self.conv_block(128,256).to(device)
         self.conv3 = self.conv3_block().to(device)
         self.linear = nn.Linear(128,num_labels).to(device)
+        
+        
     def conv_block(self,input_channel,num_filters):
         return nn.Sequential(
                                 nn.Conv2d(input_channel,num_filters,3,1,1),
@@ -77,8 +75,9 @@ class PiModel(nn.Module):
                               nn.LeakyReLU(0.1)
 
         )
-    def forward(self,x):
-        x = self.noise(x)
+    def forward(self,x,train):
+        if train:
+            x = self.noise(x)
         x = self.conv1(x)
         x = self.conv2(x)
         x = self.conv3(x)

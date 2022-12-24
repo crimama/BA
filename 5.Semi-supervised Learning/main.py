@@ -10,7 +10,7 @@ import wandb
 
 from sklearn.metrics import f1_score,accuracy_score
 
-from src.Dataset import CifarDataset,label_unlabel_load,img_load_all
+from src.Dataset import CifarDataset,label_unlabel_load,dataset_load
 from src.Models import Model,PiModel
 from src.Loss import PiCriterion
 
@@ -24,39 +24,39 @@ import yaml
 import warnings 
 warnings.filterwarnings('ignore')
 
-def make_transform(cfg):
+def make_transform():
     color_jitter = transforms.ColorJitter(brightness=0.4, contrast=0.4, saturation=0.4, hue=0.1)
-    label_transform = transforms.Compose([
+    transformer = transforms.Compose([
                                           transforms.RandomApply([color_jitter],p=0.8),
                                           transforms.RandomResizedCrop(32),
                                           transforms.GaussianBlur(kernel_size=int(0.1*32))
                                          ])
-    return label_transform 
+    return transformer
 
 def make_valid(dataset = 'cifar10'):
-    (train_imgs,train_labels),(test_imgs,test_labels) = img_load_all(dataset)
+    (train_imgs,train_labels),(_,_) = dataset_load(dataset)
     idx = np.random.choice(np.arange(len(train_imgs)),5000,replace=False)
     valid_set = {'imgs':train_imgs[idx],
         'labels':train_labels[idx]}
     return valid_set 
 
-def train(model,criterion,optimizer,train_loader,cfg,transform):
+def train(model,criterion,optimizer,train_loader,cfg,transformer):
     global epoch 
     model.train() 
     tl_loss = [] 
     tu_loss = [] 
-    epoch_loss = [] 
+    total_loss = [] 
     for batch_img,batch_labels in tqdm(train_loader):
         
-        batch_img_1 = transform(batch_img.type(torch.float32).to(cfg['device']))
-        batch_img_2 = transform(batch_img.type(torch.float32).to(cfg['device']))
+        batch_img_1 = transformer(batch_img.type(torch.float32).to(cfg['device']))
+        batch_img_2 = transformer(batch_img.type(torch.float32).to(cfg['device']))
         batch_labels = batch_labels.to(cfg['device'])
         
-        y_pred_1 = model(batch_img_1)
-        y_pred_2 = model(batch_img_2)
-        loss,tl,tu = criterion(y_pred_1,y_pred_2,batch_labels,epoch)
+        y_pred_1 = model(batch_img_1,True)
+        y_pred_2 = model(batch_img_2,True)
+        loss,tl,tu,weight = criterion(y_pred_1,y_pred_2,batch_labels,epoch)
         
-        epoch_loss.append(loss.detach().cpu().numpy())
+        total_loss.append(loss.detach().cpu().numpy())
         tl_loss.append(tl.detach().cpu().numpy())
         tu_loss.append(tu.detach().cpu().numpy())
         
@@ -64,16 +64,17 @@ def train(model,criterion,optimizer,train_loader,cfg,transform):
         loss.backward()
         optimizer.step()
         
-    return np.mean(epoch_loss),np.mean(tl_loss),np.mean(tu_loss)
+    return np.mean(total_loss),np.mean(tl_loss),np.mean(tu_loss),weight
 
-def valid(model,test_loader,transform,cfg):
+
+def valid(model,test_loader,cfg):
     labels = []
     y_preds = [] 
     model.eval() 
     for batch_imgs,batch_labels in test_loader:
         batch_imgs = batch_imgs.type(torch.float32).to(cfg['device'])
         with torch.no_grad():
-            y_pred = model(batch_imgs)
+            y_pred = model(batch_imgs,False)
         y_pred = torch.argmax(F.softmax(y_pred),dim=1)
         y_pred = y_pred.detach().cpu().numpy()
         
@@ -88,6 +89,8 @@ def parse_arguments():
     parser.add_argument('-Exp',default=0)
     parser.add_argument('-model',default='resnet18')
     parser.add_argument('-unlabel_ratio',default=0)
+    parser.add_argument('-Un_loss',default =True)
+    parser.add_argument('-dataset',default='cifar10')
     args = parser.parse_args() 
     try:
         os.mkdir(f"./Save_models/{args.Exp}")
@@ -127,7 +130,6 @@ if __name__ == "__main__":
     exp_init(cfg)
 #init 
     wandb.init(
-                # set the wandb project where this run will be logged
                 project="BA_SSL",
                 name=f"{cfg['Exp']}"
             )
@@ -143,30 +145,32 @@ if __name__ == "__main__":
     valid_loader = DataLoader(valid_dataset,batch_size=cfg['batch_size'],shuffle=False)
     test_loader = DataLoader(test_dataset,batch_size=cfg['batch_size'],shuffle=False)
 
-    tl_transform= make_transform(cfg)
+    transformer= make_transform()
 #model 
     model = Model(cfg['model_name']).to('cuda')
-    criterion = PiCriterion()
+    criterion = PiCriterion(cfg)
     optimizer = torch.optim.Adam(model.parameters(),lr=cfg['lr'],betas=(cfg['beta1'],cfg['beta2']))
 
 #train  
     
     best_epoch = np.inf 
     for epoch in range(cfg['epochs']):
-        loss,tl_loss,tu_loss =  train(model,criterion,optimizer,train_loader,cfg,tl_transform)
-        f1 , auc = valid(model,valid_loader,tl_transform,cfg)
+        loss,tl_loss,tu_loss,weight =  train(model,criterion,optimizer,train_loader,cfg,transformer)
+        f1 , auc = valid(model,valid_loader,cfg)
         print(f'\n Epochs : {epoch}')
         print(f'\n loss : {loss} | tl_loss : {tl_loss} | tu_loss : {tu_loss}')
         print(f'\n test f1 : {f1}')
         print(f'\n test auc : {auc}')
-#check point             
-    if loss < best_epoch:
-        torch.save(model,'./Save_models/best.pt')
-        best_epoch = loss 
-        print(f'model saved | best loss :{best_epoch}')
+        
 #log 
-    wandb.log({ 'loss'      : loss, 
+        wandb.log({ 'loss'      : loss, 
                     'tl_loss'   : tl_loss,
                     'tu_loss'   : tu_loss,
+                    'weight'    : weight,
                     'f1'        : f1,
                     'auc'       : auc})
+#check point             
+        if loss < best_epoch:
+            torch.save(model,f"./Save_models/{cfg['Exp']}/best.pt")
+            best_epoch = loss 
+            print(f'model saved | best loss :{best_epoch}')
