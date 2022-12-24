@@ -70,6 +70,7 @@ def img_load_all(datasets = None):
     elif datasets == 'cifar100':
         return load_cifar100()
 
+'''
 def label_unlabel_load(cfg):
         (train_imgs,train_labels),(test_imgs,test_labels) = img_load_all(cfg['dataset'])
         split_std = int(len(train_imgs)*(1-cfg['unlabel_ratio']))
@@ -80,3 +81,18 @@ def label_unlabel_load(cfg):
         test = {'imgs':test_imgs,
                 'labels':test_labels}
         return train_label,train_unlabel,test    
+''' 
+def label_unlabel_load(cfg):
+    (train_imgs,train_labels),(test_imgs,test_labels) = img_load_all(cfg['dataset'])
+    labels = np.unique(train_labels)
+    label = labels[0]
+    for label in labels:
+        label_idx = (train_labels ==label).nonzero()[0]
+        unlabel_idx = np.random.choice(label_idx,int(len(label_idx)*cfg['unlabel_ratio']),replace=False)
+        train_labels[unlabel_idx] = -1 
+        
+    train = {'imgs':train_imgs,
+            'labels':train_labels}
+    test = {'imgs':test_imgs,
+            'labels':test_labels}
+    return train, test 
