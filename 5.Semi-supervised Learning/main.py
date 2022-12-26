@@ -87,24 +87,20 @@ def valid(model,test_loader,cfg):
 def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('-Exp',default=0)
-    parser.add_argument('-model',default='resnet18')
+    parser.add_argument('-model_name',default='resnet18')
     parser.add_argument('-unlabel_ratio',default=0)
-    parser.add_argument('-Un_loss',default =True)
+    parser.add_argument('-super_only',default = False)
     parser.add_argument('-dataset',default='cifar10')
     args = parser.parse_args() 
-    try:
-        os.mkdir(f"./Save_models/{args.Exp}")
-    except:
-        pass 
     return args 
 
 def yaml_save(cfg):
-    with open(f"./Save_models/{cfg['Exp']}/config.yml", "w") as f:
+    with open(f"./Save_models/{cfg['dir']}/config.yml", "w") as f:
         yaml.dump(cfg, f)
         
 def exp_init(cfg):
     try:
-        os.mkdir(f"./Save_models/{cfg['Exp']}")
+        os.mkdir(f"./Save_models/{cfg['dir']}")
     except:
         pass
     yaml_save(cfg)
@@ -122,16 +118,18 @@ if __name__ == "__main__":
     cfg['beta2'] = 0.999 
     cfg['epochs'] = 300 
     cfg['std'] = 0.15  
-    
+#init & hyperparameter setting     
     args = parse_arguments()
     cfg['Exp'] = args.Exp
-    cfg['model_name'] = args.model
+    cfg['model_name'] = args.model_name
     cfg['unlabel_ratio'] = float(args.unlabel_ratio)
+    cfg['super_only'] = bool(args.super_only)
+    cfg['dir'] = f"{cfg['Exp']}_{cfg['model_name']}_{cfg['super_only']}_{cfg['unlabel_ratio']}"
     exp_init(cfg)
 #init 
     wandb.init(
-                project="BA_SSL",
-                name=f"{cfg['Exp']}"
+                project="BA_SSL2",
+                name=f"{cfg['dir']}"
             )
 
 #Data load 
@@ -147,13 +145,16 @@ if __name__ == "__main__":
 
     transformer= make_transform()
 #model 
-    model = Model(cfg['model_name']).to('cuda')
+    if cfg['model_name'] == 'PiModel':
+        model = PiModel(device='cuda')
+    else:
+        model = Model(cfg['model_name']).to('cuda')
     criterion = PiCriterion(cfg)
     optimizer = torch.optim.Adam(model.parameters(),lr=cfg['lr'],betas=(cfg['beta1'],cfg['beta2']))
 
 #train  
     
-    best_epoch = np.inf 
+    best_loss = np.inf 
     for epoch in range(cfg['epochs']):
         loss,tl_loss,tu_loss,weight =  train(model,criterion,optimizer,train_loader,cfg,transformer)
         f1 , auc = valid(model,valid_loader,cfg)
@@ -163,14 +164,26 @@ if __name__ == "__main__":
         print(f'\n test auc : {auc}')
         
 #log 
-        wandb.log({ 'loss'      : loss, 
+        result_log = { 'loss'      : loss, 
                     'tl_loss'   : tl_loss,
                     'tu_loss'   : tu_loss,
                     'weight'    : weight,
                     'f1'        : f1,
-                    'auc'       : auc})
+                    'auc'       : auc}
+        wandb.log(result_log)
 #check point             
-        if loss < best_epoch:
-            torch.save(model,f"./Save_models/{cfg['Exp']}/best.pt")
-            best_epoch = loss 
-            print(f'model saved | best loss :{best_epoch}')
+        if loss < best_loss:
+            torch.save(model,f"./Save_models/{cfg['dir']}/best.pt")
+            best_loss = loss 
+            best_epoch = epoch 
+            print(f'model saved | best loss :{best_loss}')
+
+        if loss > 1000000:
+            model = torch.load(f"./Save_models/{cfg['dir']}/best.pt")
+            print("Model reloaded")
+
+        if epoch - 20 > best_epoch:
+            break 
+        
+    torch.save(model,f"{cfg['dir']}/best.pt")
+    print(f'last model saved')

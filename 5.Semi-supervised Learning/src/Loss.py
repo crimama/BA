@@ -7,6 +7,8 @@ class PiCriterion:
         self.label_criterion = nn.CrossEntropyLoss()
         self.unlabel_criterion = nn.MSELoss()
         self.n_labeled = 50000 * (1-cfg['unlabel_ratio'])
+        self.superonly = cfg['super_only']
+        
     def ramp_up_function(self,epoch, epoch_with_max_rampup=80):
 
         if epoch < epoch_with_max_rampup:
@@ -30,16 +32,21 @@ class PiCriterion:
             return self.ramp_up(epoch, max_epochs, max_val, mult)
         
     def __call__(self,y_pred_1,y_pred_2,batch_labels,epoch):
-        label_idx = (batch_labels!=-1).nonzero()
+        label_idx = (batch_labels!=-1).nonzero().flatten()
         #supervised loss 
-        tl_loss = self.label_criterion(y_pred_1[label_idx].squeeze(),
-                                       batch_labels[label_idx].flatten())
+        tl_loss = self.label_criterion(y_pred_1[label_idx],
+                                       batch_labels[label_idx])
         #unsupervised loss 
         weight = self.weight_schedule(epoch)
         weight = torch.autograd.Variable(torch.FloatTensor([weight]).cuda(), requires_grad=False)
         tu_loss = self.unlabel_criterion(y_pred_1,y_pred_2) * weight 
-        #total loss 
-        loss = tl_loss + tu_loss  
         
-        return loss, tl_loss, tu_loss, weight 
+        if self.superonly:
+            return tl_loss,torch.tensor([0]),torch.tensor([0]),torch.tensor([0])
+        else:
+            #total loss 
+            loss = tl_loss + tu_loss  
+            
+            return loss, tl_loss, tu_loss, weight 
+            
         
