@@ -381,3 +381,19 @@ def valid(model,valid_loader,cfg):
 ```    
 
 ## 5. 실험 결과 
+
+<p align='center'><img src = 'https://user-images.githubusercontent.com/92499881/209601897-d33bde67-1b06-48e1-bc97-72d3d3427961.png'>
+
+- Encoder로는 논문에서 사용한 Vanilla CNN을 구현하여 사용하였으며 비교 군으로 사전 학습 모델인 Resnet18 모델을 사용 함
+- SuperOnly는 Unlabel ratio 가 0일 경우 Supervised Loss만 사용할지 혹은 Unsupervised Loss도 같이 사용할지 결정하는 요소이다. 
+- Uratio는 Unlabeled data의 비율로, 클 수록 labeled data보다 Unlabeled data의 비중이 커진다. 
+  
+**결과**  
+```
+결과만 보았을 때 논문에서 제시하는 성능에 절반도 못 미치는 좋지 못한 성능을 보여주고 있다. 이러한 이유로는 우선 적용한 Augmentation 때문이라 생각된다. 해당 논문에서는 Augmentation 조합을 따로 명시하고 있지 않아 임의의 Augmentation을 사용했으며, 이 때문에 성능에서 차이가 난다고 생각 된다. 또한 PiModel의 경우 Loss 값이 엄청 커지는 Gradient Explode가 계속 발생 하여 정상적으로 학습이 이뤄지지 않은 문제도 존재 하였다. 
+
+저조한 성능 안에서 비교 분석을 해 보면 단순 지도 학습을 하는 경우가 가장 좋은 성능을 보여 주지만 이는 실험 오류라 생각 된다. semi-supervised learning을 적용해야 하는 상황을 가정 해 보면 labeled data가 한정되어 있는 상황에서 Unlabeled data를 사용하는 것이지만 이 실험에서는 단순히 labeled - unlabeled data의 비율만 조정하였으며 가장 좋은 성능이 나온 경우 labeled data를 50000개 사용한 것이므로 성능이 좋을 수밖에 없다. 
+
+따라서 정상적인 Semi-supervised learning의 효과를 보기 위해서는 labeled data의 갯수는 고정한 채로 unlabeled data의 수를 조절하여 비교할 필요가 있다 생각 된다. 
+```
+    

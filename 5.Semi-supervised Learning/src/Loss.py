@@ -9,14 +9,6 @@ class PiCriterion:
         self.n_labeled = 50000 * (1-cfg['unlabel_ratio'])
         self.superonly = cfg['super_only']
         
-    def ramp_up_function(self,epoch, epoch_with_max_rampup=80):
-
-        if epoch < epoch_with_max_rampup:
-            p = max(0.0, float(epoch)) / float(epoch_with_max_rampup)
-            p = 1.0 - p
-            return math.exp(-p*p*5.0)
-        else:
-            return 1.0
     def ramp_up(self,epoch, max_epochs=80, max_val=30, mult=-5):
         if epoch == 0:
             return 0.
@@ -42,7 +34,7 @@ class PiCriterion:
         tu_loss = self.unlabel_criterion(y_pred_1,y_pred_2) * weight 
         
         if self.superonly:
-            return tl_loss,torch.tensor([0]),torch.tensor([0]),torch.tensor([0])
+            return tl_loss, tl_loss ,torch.tensor([0]),torch.tensor([0])
         else:
             #total loss 
             loss = tl_loss + tu_loss  

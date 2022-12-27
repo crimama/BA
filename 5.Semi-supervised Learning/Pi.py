@@ -128,13 +128,14 @@ if __name__ == "__main__":
     exp_init(cfg)
 #init 
     wandb.init(
-                project="BA_SSL2",
+                project="BA_SSL3",
                 name=f"{cfg['dir']}"
             )
 
 #Data load 
     train_set,test_set = label_unlabel_load(cfg)
     valid_set = make_valid()
+    
     train_dataset = CifarDataset(train_set, unlabel=False)
     valid_dataset = CifarDataset(valid_set, unlabel=False)
     test_dataset = CifarDataset(test_set,unlabel=False)
@@ -154,7 +155,7 @@ if __name__ == "__main__":
 
 #train  
     
-    best_loss = np.inf 
+    best_auc = 0
     for epoch in range(cfg['epochs']):
         loss,tl_loss,tu_loss,weight =  train(model,criterion,optimizer,train_loader,cfg,transformer)
         f1 , auc = valid(model,valid_loader,cfg)
@@ -172,18 +173,18 @@ if __name__ == "__main__":
                     'auc'       : auc}
         wandb.log(result_log)
 #check point             
-        if loss < best_loss:
+        if auc > best_auc:
             torch.save(model,f"./Save_models/{cfg['dir']}/best.pt")
-            best_loss = loss 
+            best_auc = auc
             best_epoch = epoch 
-            print(f'model saved | best loss :{best_loss}')
+            print(f'model saved | best auc :{best_auc}')
 
         if loss > 1000000:
             model = torch.load(f"./Save_models/{cfg['dir']}/best.pt")
             print("Model reloaded")
-
-        if epoch - 20 > best_epoch:
-            break 
+            
+        if epoch - 30 > best_epoch:
+            break
         
-    torch.save(model,f"{cfg['dir']}/best.pt")
+    torch.save(model,f"./Save_models/{cfg['dir']}/last.pt")
     print(f'last model saved')
