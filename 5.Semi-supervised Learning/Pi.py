@@ -88,7 +88,8 @@ def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('-Exp',default=0)
     parser.add_argument('-model_name',default='resnet18')
-    parser.add_argument('-unlabel_ratio',default=0)
+    parser.add_argument('-unlabel',default=1000)
+    parser.add_argument('-label',default=500)
     parser.add_argument('-super_only',default = False)
     parser.add_argument('-dataset',default='cifar10')
     args = parser.parse_args() 
@@ -110,25 +111,26 @@ if __name__ == "__main__":
     cfg = {}
     cfg['dataset'] = 'cifar10'
     cfg['model_name'] = 'resnet18'
-    cfg['unlabel_ratio'] = 0
+    cfg['unlabel'] = 0
     cfg['batch_size'] = 100 
     cfg['device'] = 'cuda:0'
     cfg['lr'] = 0.003 
     cfg['beta1'] = 0.8
     cfg['beta2'] = 0.999 
-    cfg['epochs'] = 300 
+    cfg['epochs'] = 150 
     cfg['std'] = 0.15  
 #init & hyperparameter setting     
     args = parse_arguments()
     cfg['Exp'] = args.Exp
     cfg['model_name'] = args.model_name
-    cfg['unlabel_ratio'] = float(args.unlabel_ratio)
+    cfg['unlabel'] = int(args.unlabel)
+    cfg['label'] = int(args.label)
     cfg['super_only'] = bool(args.super_only)
-    cfg['dir'] = f"{cfg['Exp']}_{cfg['model_name']}_{cfg['super_only']}_{cfg['unlabel_ratio']}"
+    cfg['dir'] = f"{cfg['Exp']}_{cfg['model_name']}_{cfg['super_only']}_{cfg['label']}_{cfg['unlabel']}"
     exp_init(cfg)
 #init 
     wandb.init(
-                project="BA_SSL3",
+                project="BA_SSL4",
                 name=f"{cfg['dir']}"
             )
 
@@ -183,7 +185,7 @@ if __name__ == "__main__":
             model = torch.load(f"./Save_models/{cfg['dir']}/best.pt")
             print("Model reloaded")
             
-        if epoch - 30 > best_epoch:
+        if epoch - 40 > best_epoch:
             break
         
     torch.save(model,f"./Save_models/{cfg['dir']}/last.pt")

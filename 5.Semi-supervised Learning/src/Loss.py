@@ -6,7 +6,7 @@ class PiCriterion:
     def __init__(self,cfg):
         self.label_criterion = nn.CrossEntropyLoss()
         self.unlabel_criterion = nn.MSELoss()
-        self.n_labeled = 50000 * (1-cfg['unlabel_ratio'])
+        self.n_labeled = cfg['label']
         self.superonly = cfg['super_only']
         
     def ramp_up(self,epoch, max_epochs=80, max_val=30, mult=-5):

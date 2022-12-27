@@ -3,6 +3,7 @@ from torch.utils.data import Dataset
 import torchvision.transforms as transforms 
 from glob import glob 
 import numpy as np 
+import pandas as pd 
 import pickle 
 class CifarDataset(Dataset):
     def __init__(self,data,unlabel=False,transform=None):
@@ -81,11 +82,11 @@ def label_unlabel_load(cfg):
         test = {'imgs':test_imgs,
                 'labels':test_labels}
         return train_label,train_unlabel,test    
-''' 
+
 def label_unlabel_load(cfg):
     (train_imgs,train_labels),(test_imgs,test_labels) = dataset_load(cfg['dataset'])
     labels = np.unique(train_labels)
-    label = labels[0]
+    
     for label in labels:
         label_idx = (train_labels ==label).nonzero()[0]
         unlabel_idx = np.random.choice(label_idx,int(len(label_idx)*cfg['unlabel_ratio']),replace=False)
@@ -97,3 +98,37 @@ def label_unlabel_load(cfg):
     test = {'imgs':test_imgs,
             'labels':test_labels}
     return train, test 
+''' 
+
+
+def label_unlabel_load(cfg):
+    (train_imgs,train_labels),(test_imgs,test_labels) = dataset_load(cfg['dataset'])
+    labels = np.unique(train_labels)
+
+
+    label_list = [] 
+    unlabel_list = []
+    for label in labels:
+        label_idx = (train_labels ==label).nonzero()[0]
+        unlabel_idx = np.random.choice(label_idx,int(cfg['unlabel']/10),replace=False)
+        label_idx = label_idx[pd.Series(label_idx).apply(lambda x : x not in unlabel_idx)]
+        label_idx = np.random.choice(label_idx,int(cfg['label']/10),replace=False)
+        
+        label_list.extend(label_idx)
+        unlabel_list.extend(unlabel_idx)    
+    #label + unlabel     
+    selected_imgs = train_imgs[(label_list + unlabel_list)]    
+    selected_labels = train_labels[(label_list + unlabel_list)]    
+    selected_labels[len(label_list):] = -1 #unlabel data's label -> -1 
+    #Shuffle 
+    shuffle_idx = np.arange(len(selected_imgs))
+    np.random.shuffle(shuffle_idx)
+    selected_imgs = selected_imgs[shuffle_idx]
+    selected_labels = selected_labels[shuffle_idx]
+
+    train = {'imgs':selected_imgs,
+            'labels':selected_labels}
+
+    test = {'imgs':test_imgs,
+                'labels':test_labels}
+    return train,test 

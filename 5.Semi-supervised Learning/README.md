@@ -7,8 +7,8 @@
   - [개요](#개요)
   - [Semi Supervised Learning의 가정](#semi-supervised-learning의-가정)
   - [Semi Supervised Learning 방법론 종류](#semi-supervised-learning-방법론-종류)
-- [튜토리얼](#튜토리얼)
-  - [0. $\\Pi-model$ 이란?](#0-pi-model-이란)
+- [튜토리얼 - Pi model](#튜토리얼---pi-model)
+  - [0. π-model 이란?](#0-π-model-이란)
   - [1. 데이터 로드](#1-데이터-로드)
     - [1.1. 데이터셋 로드](#11-데이터셋-로드)
     - [1.2. label - unlabel split](#12-label---unlabel-split)
@@ -19,6 +19,12 @@
   - [3. Loss function](#3-loss-function)
   - [4. 학습](#4-학습)
   - [5. 실험 결과](#5-실험-결과)
+  - [6. 재실험](#6-재실험)
+- [튜토리얼 - Temporal Ensemble](#튜토리얼---temporal-ensemble)
+  - [1. Temporal Ensemble](#1-temporal-ensemble)
+  - [2.](#2)
+  - [3. 실험 결과](#3-실험-결과)
+- [결론](#결론)
 
 # 이론 
 
@@ -61,10 +67,10 @@ $\space$
 - 가장 유명한 모델은 $\Pi-model$, Temporal Ensembling, Mean Teacher 등이 있다. 
 
 
-# 튜토리얼 
+# 튜토리얼 - Pi model 
 - 튜토리얼에서는 Consistency 기반의 Semi supervised learning, 그리고 그 중에서 Target Quality 와 관련된 방법인 Pi 모델을 구현하고자 한다. 
 
-## 0. $\Pi-model$ 이란? 
+## 0. π-model 이란? 
 - $\Pi-model$ 이란 Temporal Ensembling for semi-supervised learning 논문에서 제안 된 방법론으로 Temporal Ensembling 설명을 위해 사전에 개발된 모델이다. 굉장히 단순한 구조이지만 향후 나타나는 다양한 방법론들의 기본 구조가 되는 모델이며 간단하게 구현이 가능하다. 
 - 단 1개의 Encoder를 사용하여 Supervised Loss를 구하고 Augmentation을 통해 Unsupervised Loss로 Regularization을 주게 된다. 
 
@@ -72,8 +78,8 @@ $\space$
 
 
 ## 1. 데이터 로드 
-- 학습 데이터로는 Cifar10과 Cifar100을 사용한다. 
-- 해당 데이터셋은 32x32의 크기를 갖는 이미지 60000만장의 데이터셋으로 Cifar10은 class label 수가 10개, Cifar100은 class label 수가 100개를 의미한다. 
+- 학습 데이터로는 Cifar10을 사용한다. 
+- 해당 데이터셋은 32x32의 크기를 갖는 이미지 60000만장의 데이터셋으로 Cifar10은 class label 수가 10개를 의미한다. 
 - 기본적인 Augmentation은 `ToTensor` 만을 사용하며 학습 과정 중에 Sthocastic data transformation이 가해지게 된다. 
 
 ### 1.1. 데이터셋 로드 
@@ -397,3 +403,96 @@ def valid(model,valid_loader,cfg):
 따라서 정상적인 Semi-supervised learning의 효과를 보기 위해서는 labeled data의 갯수는 고정한 채로 unlabeled data의 수를 조절하여 비교할 필요가 있다 생각 된다. 
 ```
     
+## 6. 재실험 
+<p align='center'><img src = 'https://user-images.githubusercontent.com/92499881/209626106-1ebef6a7-0fcc-405e-926b-a33a3636c039.png'>
+
+- 조건을 label data수는 일정하게 고정한 뒤 unlabel data의 수를 바꾸는 경우로 추가 실험을 진행 하였다. 성능이 논문에서 제시한 성능과 상당히 차이가 난다. 
+- resnet을 encoder로 사용한 경우 supervised setting을 제외한다면 unlabel data가 많을 수록 대체로 나은 성능을 보였지만 그 차이는 크지 않았다. 
+
+
+# 튜토리얼 - Temporal Ensemble
+- Temporal Ensemble은 $\Pi-model$와 같은 논문에서 제안 된 방법론으로 한 이미지에 대해 두 번 Evlauate하는 $\Pi-model$와 달리 한 번만 Evaluate하며 Target으로 이전 epoch의 결과들을 EMA을 사용한다. 
+- 코드에서 $\Pi-model$과 주로 차이나는 부분은 학습 부분과 Target을 EMA하는 부분으로, 이를 제외하고 나머지는 모두 동일하다. 
+
+## 1. Temporal Ensemble 
+- 처음 객체를 선언할 때 0의 값만 가진 label prediction을 만듬 
+- 해당 prediction은 전체 data 갯수 x 10의 shape을 가짐 
+- predict는 각 학습 step마다 batch index에 해당하는 data를 출력해 주며 
+- 각 epoch 학습이 종료된 뒤에는 해당 epoch에서 출력된 model의 evaluate로 ema를 업데이트 해주게 됨 
+
+```python 
+class TemporalEnsemble:
+    def __init__(self,cfg):
+        self.cfg = cfg
+        self.length = cfg['label'] + cfg['unlabel']
+        self.Z = self.make_zeros()
+        self.alpha = cfg['alpha']
+        
+        
+    def make_zeros(self):
+        if self.cfg['dataset'] == 'cifar10':
+            return torch.zeros(self.length,10).float()
+        elif self.cfg['dataset'] == 'cifar100':
+            return torch.zeros(self.length,100).float()
+        
+    def predict(self,i):
+        return self.Z[i * self.cfg['batch_size'] : (i+1)*self.cfg['batch_size']]
+    
+    def update(self,outputs):
+        outputs = torch.from_numpy(np.array(outputs))
+        self.Z = self.alpha * self.Z + (1. - self.alpha) * outputs
+```
+
+## 2.
+- 학습하는 과정에서 $\Pi-model$과 차이가 나게 되는데 $\Pi-model$에서는 각 step마다 두번의 evaluate가 행해지게 되지만 Temporal Ensemble같은 경우에서는 EMA target만을 사용하면 되기 때문에 한 번의 Evaluate만 행해지면 된다. 
+- 이러한 차이 때문에 학습 시간에서도 $\Pi-model$과 차이가 나게 된다. 
+
+```python
+
+def train(model,criterion,optimizer,train_loader,cfg,transformer,te):
+    global epoch
+    model.train()     
+    outputs = []
+    tl_loss = [] 
+    tu_loss = []
+    total_loss = []  
+    for step,(batch_img,batch_labels) in enumerate(tqdm(train_loader)):
+        
+        batch_img = transformer(batch_img.type(torch.float32).to(cfg['device']))
+        batch_labels = batch_labels.to(cfg['device'])
+        y_pred = model(batch_img,True)
+        z_pred = te.predict(step).to(cfg['device'])
+        
+        loss,tl,tu,weight = criterion(y_pred,z_pred,batch_labels,epoch)
+        
+        optimizer.zero_grad()
+        loss.backward()
+        optimizer.step()
+        
+        outputs.extend(y_pred.detach().cpu().numpy())
+        total_loss.append(loss.detach().cpu().numpy())
+        tl_loss.append(tl.detach().cpu().numpy())
+        tu_loss.append(tu.detach().cpu().numpy())
+        
+    te.update(outputs)
+    return np.mean(total_loss),np.mean(tl_loss),np.mean(tu_loss),weight
+
+```
+
+## 3. 실험 결과 
+
+<p align='center'><img src = 'https://user-images.githubusercontent.com/92499881/209627590-53ca23cb-bc66-4cf0-a58e-51aec86cff96.png'>
+
+- $\Pi-model$ 의 결과와 마찬가지로 논문에서 제시하고 있는 성능과는 다소 차이가 있어 보인다. 
+
+
+
+# 결론 
+- 튜토리얼에서 $\Pi-model$과 Temporal Ensemble을 직접 구현해보고 성능을 확인해 보았다. 하지만 실험 결과는 논문에서 제시한 결과와 다소 큰 차이를 보이고 있는데 이러한 차이의 이유를 추측하면 다음과 같다. 
+  
+   1. Augmentation 종류 및 선택 
+   2. 모델 구성 
+   3. Ramp up function 구성 
+   4. 데이터셋, 로더 구성 
+   
+- 하지만 그럼에도 위에서 말한 이 것들로 인해 그렇게 성능 차이가 크게 발생한다는 것이 쉽게 이해가 되지 않는다. 가장 합리적으로 의심이 가는 것은 데이터셋,로더를 구성하는 과정에서 어떠한 오류 혹은 잘못된 코드로 인해 이러한 결과가 나온게 아닌가 싶다. 

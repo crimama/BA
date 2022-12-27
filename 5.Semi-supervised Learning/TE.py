@@ -89,14 +89,16 @@ def valid(model,test_loader,cfg):
 class TemporalEnsemble:
     def __init__(self,cfg):
         self.cfg = cfg
+        self.length = cfg['label'] + cfg['unlabel']
         self.Z = self.make_zeros()
         self.alpha = cfg['alpha']
         
+        
     def make_zeros(self):
         if self.cfg['dataset'] == 'cifar10':
-            return torch.zeros(50000,10).float()
+            return torch.zeros(self.length,10).float()
         elif self.cfg['dataset'] == 'cifar100':
-            return torch.zeros(50000,100).float()
+            return torch.zeros(self.length,100).float()
         
     def predict(self,i):
         return self.Z[i * self.cfg['batch_size'] : (i+1)*self.cfg['batch_size']]
@@ -109,7 +111,8 @@ def parse_arguments():
     parser = argparse.ArgumentParser()
     parser.add_argument('-Exp',default=0)
     parser.add_argument('-model_name',default='resnet18')
-    parser.add_argument('-unlabel_ratio',default=0)
+    parser.add_argument('-unlabel',default=1000)
+    parser.add_argument('-label',default=500)
     parser.add_argument('-super_only',default = False)
     parser.add_argument('-dataset',default='cifar10')
     args = parser.parse_args() 
@@ -144,13 +147,14 @@ if __name__ == "__main__":
     args = parse_arguments()
     cfg['Exp'] = args.Exp
     cfg['model_name'] = args.model_name
-    cfg['unlabel_ratio'] = float(args.unlabel_ratio)
+    cfg['unlabel'] = int(args.unlabel)
+    cfg['label'] = int(args.label)
     cfg['super_only'] = bool(args.super_only)
-    cfg['dir'] = f"{cfg['Exp']}_{cfg['model_name']}_{cfg['super_only']}_{cfg['unlabel_ratio']}"
+    cfg['dir'] = f"{cfg['Exp']}_{cfg['model_name']}_{cfg['super_only']}_{cfg['label']}_{cfg['unlabel']}"
     exp_init(cfg)
 #init 
     wandb.init(
-                project="BA_SSL3",
+                project="BA_SSL4",
                 name=f"{cfg['dir']}"
             )
 
