@@ -22,7 +22,7 @@
   - [6. 재실험](#6-재실험)
 - [튜토리얼 - Temporal Ensemble](#튜토리얼---temporal-ensemble)
   - [1. Temporal Ensemble](#1-temporal-ensemble)
-  - [2.](#2)
+  - [2. 학습](#2-학습)
   - [3. 실험 결과](#3-실험-결과)
 - [결론](#결론)
 
@@ -67,8 +67,11 @@ $\space$
 - 가장 유명한 모델은 $\Pi-model$, Temporal Ensembling, Mean Teacher 등이 있다. 
 
 
-# 튜토리얼 - Pi model 
+# 튜토리얼 - Pi model
+- [튜토리얼 노트북](Tutorial_Pi.ipynb)
 - 튜토리얼에서는 Consistency 기반의 Semi supervised learning, 그리고 그 중에서 Target Quality 와 관련된 방법인 Pi 모델을 구현하고자 한다. 
+
+
 
 ## 0. π-model 이란? 
 - $\Pi-model$ 이란 Temporal Ensembling for semi-supervised learning 논문에서 제안 된 방법론으로 Temporal Ensembling 설명을 위해 사전에 개발된 모델이다. 굉장히 단순한 구조이지만 향후 나타나는 다양한 방법론들의 기본 구조가 되는 모델이며 간단하게 구현이 가능하다. 
@@ -411,6 +414,7 @@ def valid(model,valid_loader,cfg):
 
 
 # 튜토리얼 - Temporal Ensemble
+- [튜토리얼 노트북](Tutorial_TE.ipynb)
 - Temporal Ensemble은 $\Pi-model$와 같은 논문에서 제안 된 방법론으로 한 이미지에 대해 두 번 Evlauate하는 $\Pi-model$와 달리 한 번만 Evaluate하며 Target으로 이전 epoch의 결과들을 EMA을 사용한다. 
 - 코드에서 $\Pi-model$과 주로 차이나는 부분은 학습 부분과 Target을 EMA하는 부분으로, 이를 제외하고 나머지는 모두 동일하다. 
 
@@ -443,7 +447,7 @@ class TemporalEnsemble:
         self.Z = self.alpha * self.Z + (1. - self.alpha) * outputs
 ```
 
-## 2.
+## 2. 학습 
 - 학습하는 과정에서 $\Pi-model$과 차이가 나게 되는데 $\Pi-model$에서는 각 step마다 두번의 evaluate가 행해지게 되지만 Temporal Ensemble같은 경우에서는 EMA target만을 사용하면 되기 때문에 한 번의 Evaluate만 행해지면 된다. 
 - 이러한 차이 때문에 학습 시간에서도 $\Pi-model$과 차이가 나게 된다. 
 
